@@ -139,7 +139,6 @@ endef
 
 TARGET_DEVICES += sun8i-h3-nanopi-m1-plus
 
-
 define Device/sun8i-h3-nanopi-neo
   DEVICE_TITLE:=FriendlyARM NanoPi NEO
   SUPPORTED_DEVICES:=friendlyarm,nanopi-neo
@@ -148,6 +147,18 @@ endef
 
 TARGET_DEVICES += sun8i-h3-nanopi-neo
 
+IEEE8021X := wpad-mini
+RTL8192CU := $(IEEE8021X) kmod-rtl8192cu
+ATH9K_HTC := $(IEEE8021X) kmod-ath9k-htc
+
+define Device/sun8i-h3-nanopi-neo-oled-spi
+  DEVICE_TITLE:=FriendlyElec NanoPi NEO with OLED Hat
+  DEVICE_PACKAGES:=kmod-input-gpio-keys kmod-input-gpio-keys-polled kmod-input-polldev kmod-oled_ssd1306 luci-app-usb_otg $(RTL8192CU) $(ATH9K_HTC)
+  SUPPORTED_DEVICES:=friendlyarm,nanopi-neo
+  SUNXI_DTS:=sun8i-h3-nanopi-neo
+endef
+
+TARGET_DEVICES += sun8i-h3-nanopi-neo-oled-spi
 
 define Device/sun8i-h3-orangepi-pc
   DEVICE_TITLE:=Xunlong Orange Pi PC

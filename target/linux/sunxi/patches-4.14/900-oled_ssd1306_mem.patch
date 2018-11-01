@@ -1,0 +1,56 @@
+diff -Nur a/drivers/staging/Kconfig b/drivers/staging/Kconfig
+--- a/drivers/staging/Kconfig	2018-11-01 21:25:48.377666181 +0800
++++ b/drivers/staging/Kconfig	2018-11-01 21:25:26.006023412 +0800
+@@ -118,4 +118,6 @@
+ 
+ source "drivers/staging/pi433/Kconfig"
+ 
++source "drivers/staging/oled_ssd1306/Kconfig"
++
+ endif # STAGING
+diff -Nur a/drivers/staging/Makefile b/drivers/staging/Makefile
+--- a/drivers/staging/Makefile	2018-11-01 20:55:38.680349424 +0800
++++ b/drivers/staging/Makefile	2018-11-01 20:56:00.227368463 +0800
+@@ -50,3 +50,4 @@
+ obj-$(CONFIG_CRYPTO_DEV_CCREE)	+= ccree/
+ obj-$(CONFIG_DRM_VBOXVIDEO)	+= vboxvideo/
+ obj-$(CONFIG_PI433)		+= pi433/
++obj-y				+= oled_ssd1306/
+diff -Nur a/drivers/staging/oled_ssd1306/Kconfig b/drivers/staging/oled_ssd1306/Kconfig
+--- a/drivers/staging/oled_ssd1306/Kconfig	1970-01-01 08:00:00.000000000 +0800
++++ b/drivers/staging/oled_ssd1306/Kconfig	2018-11-01 20:57:08.444436207 +0800
+@@ -0,0 +1,5 @@
++config OLED_SSD1306_I2C
++	tristate "OLED SSD1306 I2C"
++	depends on I2C
++	select OF_RESERVED_MEM
++	default n
+diff -Nur a/drivers/staging/oled_ssd1306/Makefile b/drivers/staging/oled_ssd1306/Makefile
+--- a/drivers/staging/oled_ssd1306/Makefile	1970-01-01 08:00:00.000000000 +0800
++++ b/drivers/staging/oled_ssd1306/Makefile	2018-11-01 20:57:44.814972095 +0800
+@@ -0,0 +1,5 @@
++ifeq ($(CONFIG_OLED_SSD1306_I2C),m)
++obj-y					+= oled_ssd1306_mem.o
++CFLAGS_oled_ssd1306_mem.o		:= -DOLED_SSD1306_BUILD_MODULE
++endif
++
+diff -Nur a/drivers/staging/oled_ssd1306/oled_ssd1306_mem.c b/drivers/staging/oled_ssd1306/oled_ssd1306_mem.c
+--- a/drivers/staging/oled_ssd1306/oled_ssd1306_mem.c	1970-01-01 08:00:00.000000000 +0800
++++ b/drivers/staging/oled_ssd1306/oled_ssd1306_mem.c	2018-11-01 20:56:51.117157186 +0800
+@@ -0,0 +1,16 @@
++#include <linux/memblock.h>
++
++void oled_ssd1306_mem_free(phys_addr_t base, phys_addr_t size)
++{
++	if (memblock_is_region_reserved(base, size)) {
++		memblock_free(base, size);
++		memblock_remove(base, size);
++		free_reserved_area(__va(base),
++				   __va(base + size),
++				   -1, NULL);
++	}
++}
++
++#ifdef OLED_SSD1306_BUILD_MODULE
++EXPORT_SYMBOL(oled_ssd1306_mem_free);
++#endif
