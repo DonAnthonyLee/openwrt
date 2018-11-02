@@ -1,0 +1,183 @@
+diff -Nur a/arch/arm/boot/dts/sun8i-h3.dtsi b/arch/arm/boot/dts/sun8i-h3.dtsi
+--- a/arch/arm/boot/dts/sun8i-h3.dtsi	2018-11-02 14:36:22.593465309 +0800
++++ b/arch/arm/boot/dts/sun8i-h3.dtsi	2018-11-02 13:33:46.705254377 +0800
+@@ -47,28 +47,34 @@
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
+-		cpu@0 {
++		cpu0: cpu@0 {
+ 			compatible = "arm,cortex-a7";
+ 			device_type = "cpu";
+ 			reg = <0>;
++			clocks = <&ccu CLK_CPUX>;
++			clock-latency = <244144>; /* 8 32k periods */
++			clock-frequency = <1200000000>;
+ 		};
+ 
+ 		cpu@1 {
+ 			compatible = "arm,cortex-a7";
+ 			device_type = "cpu";
+ 			reg = <1>;
++			clock-frequency = <1200000000>;
+ 		};
+ 
+ 		cpu@2 {
+ 			compatible = "arm,cortex-a7";
+ 			device_type = "cpu";
+ 			reg = <2>;
++			clock-frequency = <1200000000>;
+ 		};
+ 
+ 		cpu@3 {
+ 			compatible = "arm,cortex-a7";
+ 			device_type = "cpu";
+ 			reg = <3>;
++			clock-frequency = <1200000000>;
+ 		};
+ 	};
+ 
+diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi
+--- a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-11-02 14:39:23.522215453 +0800
++++ b/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-11-02 14:39:33.334424111 +0800
+@@ -47,6 +47,8 @@
+ 
+ #include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/input/input.h>
++#include <dt-bindings/pinctrl/sun4i-a10.h>
++#include <dt-bindings/thermal/thermal.h>
+ 
+ / {
+ 	aliases {
+@@ -94,6 +96,82 @@
+ 			gpios = <&r_pio 0 3 GPIO_ACTIVE_LOW>;
+ 		};
+ 	};
++
++	vdd_cpux: gpio-regulator {
++		compatible = "regulator-gpio";
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&vdd_cpux_r_npi>;
++
++		regulator-name = "vdd-cpux";
++		regulator-type = "voltage";
++		regulator-boot-on;
++		regulator-always-on;
++		regulator-min-microvolt = <1100000>;
++		regulator-max-microvolt = <1300000>;
++		regulator-ramp-delay = <50>; /* 4ms */
++
++		gpios = <&r_pio 0 6 GPIO_ACTIVE_HIGH>;
++		gpios-states = <0x1>;
++		states = <1100000 0x0
++			  1300000 0x1>;
++	};
++};
++
++&cpu0 {
++	operating-points = <
++		1008000	1300000
++		816000	1100000
++		624000	1100000
++		480000	1100000
++		312000	1100000
++		240000	1100000
++		120000	1100000
++		>;
++	#cooling-cells = <2>;
++	cooling-min-level = <0>;
++	cooling-max-level = <6>;
++	cpu0-supply = <&vdd_cpux>;
++};
++
++&cpu_thermal {
++	trips {
++		cpu_warm: cpu_warm {
++			temperature = <65000>;
++			hysteresis = <2000>;
++			type = "passive";
++		};
++		cpu_hot: cpu_hot {
++			temperature = <75000>;
++			hysteresis = <2000>;
++			type = "passive";
++		};
++		cpu_very_hot: cpu_very_hot {
++			temperature = <90000>;
++			hysteresis = <2000>;
++			type = "passive";
++		};
++		cpu_crit: cpu_crit {
++			temperature = <105000>;
++			hysteresis = <2000>;
++			type = "critical";
++		};
++	};
++
++	cooling-maps {
++		cpu_warm_limit_cpu {
++			trip = <&cpu_warm>;
++			cooling-device = <&cpu0 THERMAL_NO_LIMIT 1>;
++		};
++		cpu_hot_limit_cpu {
++			trip = <&cpu_hot>;
++			cooling-device = <&cpu0 2 3>;
++		};
++		cpu_very_hot_limit_cpu {
++			trip = <&cpu_very_hot>;
++			cooling-device = <&cpu0 5 THERMAL_NO_LIMIT>;
++		};
++	};
+ };
+ 
+ &ehci0 {
+@@ -164,6 +242,13 @@
+ 		pins = "PL3";
+ 		function = "gpio_in";
+ 	};
++
++	vdd_cpux_r_npi: regulator_pins@0 {
++		allwinner,pins = "PL6";
++		allwinner,function = "gpio_out";
++		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
++		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
++	};
+ };
+ 
+ &uart0 {
+diff -Nur a/arch/arm/boot/dts/sunxi-h3-h5.dtsi b/arch/arm/boot/dts/sunxi-h3-h5.dtsi
+--- a/arch/arm/boot/dts/sunxi-h3-h5.dtsi	2018-11-02 14:40:21.479332786 +0800
++++ b/arch/arm/boot/dts/sunxi-h3-h5.dtsi	2018-11-02 13:30:49.138677495 +0800
+@@ -383,6 +383,18 @@
+ 			};
+ 		};
+ 
++		ths: ths@01c25000 {
++			#thermal-sensor-cells = <0>;
++			compatible = "allwinner,sun8i-h3-ths";
++			reg = <0x01c25000 0x400>,
++			      <0x01c14234 0x4>;
++			interrupts = <GIC_SPI 31 IRQ_TYPE_LEVEL_HIGH>;
++			resets = <&ccu RST_BUS_THS>;
++			reset-names = "ahb";
++			clocks = <&ccu CLK_BUS_THS>, <&ccu CLK_THS>;
++			clock-names = "ahb", "ths";
++		};
++
+ 		timer@01c20c00 {
+ 			compatible = "allwinner,sun4i-a10-timer";
+ 			reg = <0x01c20c00 0xa0>;
+@@ -683,4 +695,12 @@
+ 			};
+ 		};
+ 	};
++
++	thermal-zones {
++		cpu_thermal: cpu_thermal {
++			polling-delay-passive = <330>;
++			polling-delay = <1000>;
++			thermal-sensors = <&ths 0>;
++		};
++	};
+ };

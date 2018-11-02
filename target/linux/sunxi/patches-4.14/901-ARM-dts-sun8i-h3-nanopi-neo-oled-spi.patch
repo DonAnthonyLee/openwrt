@@ -1,6 +1,6 @@
 diff -Nur a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
---- a/arch/arm/boot/dts/Makefile	2018-11-01 21:59:57.012224941 +0800
-+++ b/arch/arm/boot/dts/Makefile	2018-11-01 22:00:51.459705907 +0800
+--- a/arch/arm/boot/dts/Makefile	2018-11-02 14:29:14.933699658 +0800
++++ b/arch/arm/boot/dts/Makefile	2018-11-02 04:13:57.718354065 +0800
 @@ -924,6 +924,7 @@
  	sun8i-h3-nanopi-m1-plus.dtb \
  	sun8i-h3-nanopi-neo.dtb \
@@ -10,18 +10,74 @@ diff -Nur a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
  	sun8i-h3-orangepi-lite.dtb \
  	sun8i-h3-orangepi-one.dtb \
 diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi
---- a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-11-01 22:16:43.518666053 +0800
-+++ b/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-11-01 22:24:46.802635109 +0800
-@@ -51,6 +51,8 @@
+--- a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-11-02 14:29:14.933699658 +0800
++++ b/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-11-02 14:39:23.522215453 +0800
+@@ -51,6 +51,13 @@
  / {
  	aliases {
  		serial0 = &uart0;
 +		i2c0 = &i2c0;
++		i2c1 = &i2c1;
++		i2c2 = &i2c2;
++		spi0 = &spi0;
++		spi1 = &spi1;
 +		spiflash = &spiflash;
++		ethernet0 = &emac;
  	};
  
  	chosen {
-@@ -135,3 +137,25 @@
+@@ -89,10 +96,38 @@
+ 	};
+ };
+ 
++&ehci0 {
++	status = "okay";
++};
++
++&ohci0 {
++	status = "okay";
++};
++
++&ehci1 {
++	status = "okay";
++};
++
++&ohci1 {
++	status = "okay";
++};
++
++&ehci2 {
++	status = "okay";
++};
++
++&ohci2 {
++	status = "okay";
++};
++
+ &ehci3 {
+ 	status = "okay";
+ };
+ 
++&ohci3 {
++	status = "okay";
++};
++
+ &mmc0 {
+ 	bus-width = <4>;
+ 	cd-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>;
+@@ -112,6 +147,11 @@
+ 		pins = "PA10";
+ 		function = "gpio_out";
+ 	};
++
++	spi0_cs_pins: spi0_cs_pins {
++		pins = "PC3", "PA6";
++		function = "gpio_out";
++	};
+ };
+ 
+ &r_pio {
+@@ -135,3 +175,58 @@
  &usbphy {
  	status = "okay";
  };
@@ -31,6 +87,9 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-
 +	#size-cells = <0>;
 +
 +	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&spi0_pins &spi0_cs_pins>;
++	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>;
 +
 +	spiflash: spiflash@0 {
 +		#address-cells = <1>;
@@ -43,13 +102,43 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-
 +	};
 +};
 +
++&spi1 {
++	// against uart3_rts_cts_pins, so disable
++	status = "disable";
++};
++
 +&i2c0 {
++	status = "okay";
++
++	rtc@68 {
++		compatible = "dallas,ds1307";
++		reg = <0x68>;
++	};
++};
++
++&i2c1 {
++    status = "okay";
++};
++
++&i2c2 {
++    status = "okay";
++};
++
++&emac {
++	local-mac-address = [ 00 00 00 00 00 00 ];	
++};
++
++&codec {
++	allwinner,audio-routing =
++		"Line Out", "LINEOUT",
++		"MIC1", "Mic",
++		"Mic",  "MBIAS";
 +	status = "okay";
 +};
 +
 diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts
---- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-01 21:52:59.180024973 +0800
-+++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-01 21:52:27.392295709 +0800
+--- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-02 14:29:14.933699658 +0800
++++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-02 13:51:26.047239730 +0800
 @@ -0,0 +1,151 @@
 +/*
 + * Copyright (C) 2016 James Pettigrew <james@innovum.com.au>
@@ -110,26 +199,26 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
 +	};
 +
 +	/delete-node/ r_gpio_keys;
-+	r_gpio_keys {
++	oled_hat_keys@0 {
 +		compatible = "gpio-keys";
 +		autorepeat;
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&oled_hat_pins>;
 +		status = "okay";
 +
-+		k1 {
++		sw1@0 {
 +			label = "k1";
 +			linux,code = <KEY_LEFT>;
 +			gpios = <&pio 0 0 GPIO_ACTIVE_HIGH>;
 +		};
 +
-+		k2 {
++		sw2@1 {
 +			label = "k2";
 +			linux,code = <KEY_HOME>;
 +			gpios = <&pio 0 2 GPIO_ACTIVE_HIGH>;
 +		};
 +
-+		k3 {
++		sw3@2 {
 +			label = "k3";
 +			linux,code = <KEY_RIGHT>;
 +			gpios = <&pio 0 3 GPIO_ACTIVE_HIGH>;
@@ -202,3 +291,48 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
 +	/delete-node/ key_pins@0;
 +};
 +
+diff -Nur a/arch/arm/boot/dts/sunxi-h3-h5.dtsi b/arch/arm/boot/dts/sunxi-h3-h5.dtsi
+--- a/arch/arm/boot/dts/sunxi-h3-h5.dtsi	2018-11-02 04:13:57.698354202 +0800
++++ b/arch/arm/boot/dts/sunxi-h3-h5.dtsi	2018-11-02 14:40:21.479332786 +0800
+@@ -593,7 +593,7 @@
+ 
+ 		i2c2: i2c@01c2b400 {
+ 			compatible = "allwinner,sun6i-a31-i2c";
+-			reg = <0x01c2b000 0x400>;
++			reg = <0x01c2b400 0x400>;
+ 			interrupts = <GIC_SPI 8 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&ccu CLK_BUS_I2C2>;
+ 			resets = <&ccu RST_BUS_I2C2>;
+@@ -647,6 +647,20 @@
+ 			status = "disabled";
+ 		};
+ 
++		r_i2c: i2c@01f02400 {
++			compatible = "allwinner,sun6i-a31-i2c";
++			reg = <0x01f02400 0x400>;
++			interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
++			pinctrl-names = "default";
++			pinctrl-0 = <&r_i2c_pins_a>;
++			clocks = <&r_ccu CLK_APB0_I2C>;
++			clock-frequency = <100000>;
++			resets = <&r_ccu RST_APB0_I2C>;
++			status = "disabled";
++			#address-cells = <1>;
++			#size-cells = <0>;
++		};
++
+ 		r_pio: pinctrl@01f02c00 {
+ 			compatible = "allwinner,sun8i-h3-r-pinctrl";
+ 			reg = <0x01f02c00 0x400>;
+@@ -662,6 +676,11 @@
+ 				pins = "PL11";
+ 				function = "s_cir_rx";
+ 			};
++
++			r_i2c_pins_a: r_i2c@0 {
++				pins = "PL0", "PL1";
++				function = "s_i2c";
++			};
+ 		};
+ 	};
+ };

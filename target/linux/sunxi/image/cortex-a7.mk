@@ -153,9 +153,9 @@ ATH9K_HTC := $(IEEE8021X) kmod-ath9k-htc
 
 define Device/sun8i-h3-nanopi-neo-oled-spi
   DEVICE_TITLE:=FriendlyElec NanoPi NEO with OLED Hat
-  DEVICE_PACKAGES:=kmod-input-gpio-keys kmod-input-gpio-keys-polled kmod-input-polldev kmod-oled_ssd1306 luci-app-usb_otg $(RTL8192CU) $(ATH9K_HTC)
+  DEVICE_PACKAGES:=kmod-input-gpio-keys kmod-input-evdev kmod-oled_ssd1306 luci-app-usb_gadget $(RTL8192CU) $(ATH9K_HTC)
   SUPPORTED_DEVICES:=friendlyarm,nanopi-neo
-  SUNXI_DTS:=sun8i-h3-nanopi-neo
+  SUNXI_DTS:=sun8i-h3-nanopi-neo-oled-spi
 endef
 
 TARGET_DEVICES += sun8i-h3-nanopi-neo-oled-spi
