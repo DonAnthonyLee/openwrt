@@ -139,7 +139,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-
 diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts
 --- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-02 14:29:14.933699658 +0800
 +++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-02 13:51:26.047239730 +0800
-@@ -0,0 +1,182 @@
+@@ -0,0 +1,187 @@
 +/*
 + * Copyright (C) 2016 James Pettigrew <james@innovum.com.au>
 + *
@@ -270,26 +270,31 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
 +    };
 +
 +    partition@3 {
-+        reg = <0x78000 0x8000>;
-+        label = "dtb";
++        reg = <0x78000 0x1000>;
++        label = "openwrt_scr";
 +    };
 +
 +    partition@4 {
++        reg = <0x79000 0x7000>;
++        label = "dtb";
++    };
++
++    partition@5 {
 +        reg = <0x80000 0x60000>;
 +        label = "font";
 +    };
 +
-+    partition@5 {
++    partition@6 {
 +        reg = <0xe0000 0x720000>;
 +        label = "firmware";
 +    };
 +
-+    partition@6 {
++    partition@7 {
 +        reg = <0xe0000 0x2e0000>;
 +        label = "kernel";
 +    };
 +
-+    partition@7 {
++    partition@8 {
 +        reg = <0x3c0000 0x440000>;
 +        label = "rootfs";
 +    };
