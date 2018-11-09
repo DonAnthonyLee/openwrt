@@ -280,7 +280,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
 +    };
 +
 +    partition@5 {
-+        reg = <0xe0000 0x6a0000>;
++        reg = <0xe0000 0x720000>;
 +        label = "firmware";
 +    };
 +
