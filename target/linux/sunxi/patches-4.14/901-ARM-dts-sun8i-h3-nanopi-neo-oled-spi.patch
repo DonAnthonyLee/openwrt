@@ -139,7 +139,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-
 diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts
 --- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-02 14:29:14.933699658 +0800
 +++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-02 13:51:26.047239730 +0800
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,182 @@
 +/*
 + * Copyright (C) 2016 James Pettigrew <james@innovum.com.au>
 + *
@@ -233,6 +233,11 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
 +	status = "okay";
 +};
 +
++&reg_usb0_vbus {
++	gpio = <&r_pio 0 2 GPIO_ACTIVE_HIGH>; /* PL2 */
++	status = "okay";
++};
++
 +&usb_otg {
 +	dr_mode = "otg";
 +	status = "okay";
@@ -240,6 +245,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
 +
 +&usbphy {
 +	usb0_id_det-gpios = <&pio 6 12 GPIO_ACTIVE_HIGH>; /* PG12 */
++	usb0_vbus-supply = <&reg_usb0_vbus>;
 +	status = "okay";
 +};
 +
@@ -254,13 +260,38 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
 +    };
 +
 +    partition@1 {
-+        reg = <0x0 0x80000>;
++        reg = <0x0 0x70000>;
 +        label = "uboot";
 +    };
 +
 +    partition@2 {
++        reg = <0x70000 0x8000>;
++        label = "uboot_env";
++    };
++
++    partition@3 {
++        reg = <0x78000 0x8000>;
++        label = "dtb";
++    };
++
++    partition@4 {
 +        reg = <0x80000 0x60000>;
 +        label = "font";
++    };
++
++    partition@5 {
++        reg = <0xe0000 0x6a0000>;
++        label = "firmware";
++    };
++
++    partition@6 {
++        reg = <0xe0000 0x2e0000>;
++        label = "kernel";
++    };
++
++    partition@7 {
++        reg = <0x3c0000 0x440000>;
++        label = "rootfs";
 +    };
 +};
 +
