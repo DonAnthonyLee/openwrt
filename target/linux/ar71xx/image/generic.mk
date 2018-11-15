@@ -148,7 +148,6 @@ define Device/ap91-5g
   IMAGE/sysupgrade.bin := append-rootfs | pad-rootfs |\
 	pad-to $$$$(ROOTFS_SIZE) | append-kernel | check-size $$$$(IMAGE_SIZE)
 endef
-TARGET_DEVICES += ap91-5g
 
 define Device/arduino-yun
   DEVICE_TITLE := Arduino Yun
@@ -560,7 +559,7 @@ define Device/lan-turtle
   $(Device/tplink-16mlzma)
   DEVICE_TITLE := Hak5 LAN Turtle
   DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-storage \
-	-kmod-ath9k -swconfig -uboot-envtools -wpad-mini
+	-kmod-ath9k -swconfig -uboot-envtools -wpad-basic
   BOARDNAME := LAN-TURTLE
   DEVICE_PROFILE := LANTURTLE
   TPLINK_HWID := 0x5348334c
@@ -717,7 +716,7 @@ define Device/packet-squirrel
   $(Device/tplink-16mlzma)
   DEVICE_TITLE := Hak5 Packet Squirrel
   DEVICE_PACKAGES := kmod-usb-core kmod-usb2 \
-	-kmod-ath9k -swconfig -uboot-envtools -wpad-mini
+	-kmod-ath9k -swconfig -uboot-envtools -wpad-basic
   BOARDNAME := PACKET-SQUIRREL
   DEVICE_PROFILE := PACKETSQUIRREL
   TPLINK_HWID := 0x5351524c
@@ -821,6 +820,15 @@ define Device/jwap230
   MTDPARTS := spi0.0:256k(u-boot)ro,64k(u-boot-env),16000k(firmware),64k(art)ro
 endef
 TARGET_DEVICES += jwap230
+
+define Device/koala
+  DEVICE_TITLE := OCEDO Koala
+  BOARDNAME := KOALA
+  DEVICE_PACKAGES := kmod-ath10k-ct ath10k-firmware-qca988x-ct
+  IMAGE_SIZE := 7424k
+  MTDPARTS := spi0.0:256k(u-boot)ro,64k(u-boot-env),7424k(firmware),1536k(kernel2),5888k(rootfs2),1088k(data)ro,64k(id)ro,64k(art)ro
+endef
+TARGET_DEVICES += koala
 
 define Device/r36a
   DEVICE_TITLE := ALFA Network R36A
