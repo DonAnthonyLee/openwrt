@@ -29,6 +29,6 @@ BOOTSIZE="$(($2 / 512))"
 ROOTFSOFFSET="$(($3 / 512))"
 ROOTFSSIZE="$(($4 / 512))"
 
-dd bs=1024 if="$UBOOT" of="$OUTPUT" seek=8 conv=notrunc
+[ -z "$UBOOT" ] || [ ! -e "$UBOOT" ] || dd bs=1024 if="$UBOOT" of="$OUTPUT" seek=8 conv=notrunc
 dd bs=512 if="$BOOTFS" of="$OUTPUT" seek="$BOOTOFFSET" conv=notrunc
 dd bs=512 if="$ROOTFS" of="$OUTPUT" seek="$ROOTFSOFFSET" conv=notrunc
