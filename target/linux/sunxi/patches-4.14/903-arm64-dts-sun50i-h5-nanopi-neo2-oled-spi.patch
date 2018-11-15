@@ -1,0 +1,475 @@
+diff -Nur a/arch/arm64/boot/dts/allwinner/Makefile b/arch/arm64/boot/dts/allwinner/Makefile
+--- a/arch/arm64/boot/dts/allwinner/Makefile	2018-11-15 21:03:57.720837250 +0800
++++ b/arch/arm64/boot/dts/allwinner/Makefile	2018-11-15 20:56:22.577004073 +0800
+@@ -10,6 +10,7 @@
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-orangepi-zero-plus.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-orangepi-zero-plus2.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-nanopi-neo2.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-nanopi-neo2-oled-spi.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-nanopi-neo-plus2.dtb
+ 
+ always		:= $(dtb-y)
+diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h5.dtsi
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h5.dtsi	2018-11-15 21:03:51.569002361 +0800
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h5.dtsi	2018-11-15 20:56:15.117410491 +0800
+@@ -47,11 +47,14 @@
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
+-		cpu@0 {
++		cpu0: cpu@0 {
+ 			compatible = "arm,cortex-a53", "arm,armv8";
+ 			device_type = "cpu";
+ 			reg = <0>;
+ 			enable-method = "psci";
++			clocks = <&ccu CLK_CPUX>;
++			clock-latency = <244144>; /* 8 32k periods */
++			clock-frequency = <1200000000>;
+ 		};
+ 
+ 		cpu@1 {
+@@ -59,6 +62,7 @@
+ 			device_type = "cpu";
+ 			reg = <1>;
+ 			enable-method = "psci";
++			clock-frequency = <1200000000>;
+ 		};
+ 
+ 		cpu@2 {
+@@ -66,6 +70,7 @@
+ 			device_type = "cpu";
+ 			reg = <2>;
+ 			enable-method = "psci";
++			clock-frequency = <1200000000>;
+ 		};
+ 
+ 		cpu@3 {
+@@ -73,6 +78,7 @@
+ 			device_type = "cpu";
+ 			reg = <3>;
+ 			enable-method = "psci";
++			clock-frequency = <1200000000>;
+ 		};
+ 	};
+ 
+diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	1970-01-01 08:00:00.000000000 +0800
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-11-15 20:56:11.187764926 +0800
+@@ -0,0 +1,417 @@
++/*
++ * Copyright (C) 2017 Icenowy Zheng <icenowy@aosc.io>
++ *
++ * This file is dual-licensed: you can use it either under the terms
++ * of the GPL or the X11 license, at your option. Note that this dual
++ * licensing only applies to this file, and not this project as a
++ * whole.
++ *
++ *  a) This file is free software; you can redistribute it and/or
++ *     modify it under the terms of the GNU General Public License as
++ *     published by the Free Software Foundation; either version 2 of the
++ *     License, or (at your option) any later version.
++ *
++ *     This file is distributed in the hope that it will be useful,
++ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *     GNU General Public License for more details.
++ *
++ * Or, alternatively,
++ *
++ *  b) Permission is hereby granted, free of charge, to any person
++ *     obtaining a copy of this software and associated documentation
++ *     files (the "Software"), to deal in the Software without
++ *     restriction, including without limitation the rights to use,
++ *     copy, modify, merge, publish, distribute, sublicense, and/or
++ *     sell copies of the Software, and to permit persons to whom the
++ *     Software is furnished to do so, subject to the following
++ *     conditions:
++ *
++ *     The above copyright notice and this permission notice shall be
++ *     included in all copies or substantial portions of the Software.
++ *
++ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
++ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
++ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ *     OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++/dts-v1/;
++#include "sun50i-h5.dtsi"
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++#include <dt-bindings/pinctrl/sun4i-a10.h>
++#include <dt-bindings/thermal/thermal.h>
++
++/ {
++	model = "FriendlyElec NanoPi NEO 2";
++	compatible = "friendlyarm,nanopi-neo2", "allwinner,sun50i-h5";
++
++	aliases {
++		serial0 = &uart0;
++		i2c0 = &i2c0;
++		spi0 = &spi0;
++		spiflash = &spiflash;
++		ethernet0 = &emac;
++	};
++
++	reserved-memory {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		ranges;
++
++		oled_ssd1306_reserved: oled-ssd1306@3c {
++			reg = <0x4b060000 0x1a0000>;
++		};
++	};
++
++	oled_hat_keys@0 {
++		compatible = "gpio-keys";
++		autorepeat;
++		pinctrl-names = "default";
++		pinctrl-0 = <&oled_hat_pins>;
++		status = "okay";
++
++		sw1@0 {
++			label = "k1";
++			linux,code = <KEY_LEFT>;
++			gpios = <&pio 0 0 GPIO_ACTIVE_HIGH>;
++		};
++
++		sw2@1 {
++			label = "k2";
++			linux,code = <KEY_HOME>;
++			gpios = <&pio 0 2 GPIO_ACTIVE_HIGH>;
++		};
++
++		sw3@2 {
++			label = "k3";
++			linux,code = <KEY_RIGHT>;
++			gpios = <&pio 0 3 GPIO_ACTIVE_HIGH>;
++		};
++	};
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		pwr {
++			label = "nanopi:green:pwr";
++			gpios = <&r_pio 0 10 GPIO_ACTIVE_HIGH>;
++			default-state = "on";
++		};
++
++		status {
++			label = "nanopi:blue:status";
++			gpios = <&pio 0 10 GPIO_ACTIVE_HIGH>;
++		};
++	};
++
++	reg_gmac_3v3: gmac-3v3 {
++		compatible = "regulator-fixed";
++		regulator-name = "gmac-3v3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		startup-delay-us = <100000>;
++		enable-active-high;
++		gpio = <&pio 3 6 GPIO_ACTIVE_HIGH>;
++	};
++
++	reg_vcc3v3: vcc3v3 {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc3v3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++	};
++
++	reg_usb0_vbus: usb0-vbus {
++		compatible = "regulator-fixed";
++		regulator-name = "usb0-vbus";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		enable-active-high;
++		gpio = <&r_pio 0 2 GPIO_ACTIVE_HIGH>; /* PL2 */
++		status = "okay";
++	};
++
++	vdd_cpux: gpio-regulator {
++		compatible = "regulator-gpio";
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&vdd_cpux_r_npi>;
++
++		regulator-name = "vdd-cpux";
++		regulator-type = "voltage";
++		regulator-boot-on;
++		regulator-always-on;
++		regulator-min-microvolt = <1100000>;
++		regulator-max-microvolt = <1100000>;
++		regulator-ramp-delay = <50>; /* 4ms */
++
++		gpios = <&r_pio 0 6 GPIO_ACTIVE_HIGH>;
++		gpios-states = <0x1>;
++		states = <1100000 0x0
++			  1100000 0x1>;
++	};
++};
++
++
++&cpu0 {
++	operating-points = <
++		1008000	1100000
++		816000	1100000
++		624000	1100000
++		480000	1100000
++		312000	1100000
++		240000	1100000
++		120000	1100000
++		>;
++	#cooling-cells = <2>;
++	cooling-min-level = <0>;
++	cooling-max-level = <6>;
++	cpu0-supply = <&vdd_cpux>;
++};
++
++&cpu_thermal {
++	trips {
++		cpu_warm: cpu_warm {
++			temperature = <65000>;
++			hysteresis = <2000>;
++			type = "passive";
++		};
++		cpu_hot: cpu_hot {
++			temperature = <75000>;
++			hysteresis = <2000>;
++			type = "passive";
++		};
++		cpu_very_hot: cpu_very_hot {
++			temperature = <90000>;
++			hysteresis = <2000>;
++			type = "passive";
++		};
++		cpu_crit: cpu_crit {
++			temperature = <105000>;
++			hysteresis = <2000>;
++			type = "critical";
++		};
++	};
++
++	cooling-maps {
++		cpu_warm_limit_cpu {
++			trip = <&cpu_warm>;
++			cooling-device = <&cpu0 THERMAL_NO_LIMIT 1>;
++		};
++		cpu_hot_limit_cpu {
++			trip = <&cpu_hot>;
++			cooling-device = <&cpu0 2 3>;
++		};
++		cpu_very_hot_limit_cpu {
++			trip = <&cpu_very_hot>;
++			cooling-device = <&cpu0 5 THERMAL_NO_LIMIT>;
++		};
++	};
++};
++
++&codec {
++	allwinner,audio-routing =
++		"Line Out", "LINEOUT",
++		"MIC1", "Mic",
++		"Mic",  "MBIAS";
++	status = "okay";
++};
++
++&ehci0 {
++	status = "okay";
++};
++
++&ehci1 {
++	status = "okay";
++};
++
++&ehci2 {
++	status = "okay";
++};
++
++&ehci3 {
++	status = "okay";
++};
++
++&emac {
++	pinctrl-names = "default";
++	pinctrl-0 = <&emac_rgmii_pins>;
++	phy-supply = <&reg_gmac_3v3>;
++	phy-handle = <&ext_rgmii_phy>;
++	phy-mode = "rgmii";
++	local-mac-address = [ 00 00 00 00 00 00 ];
++	status = "okay";
++};
++
++&external_mdio {
++	ext_rgmii_phy: ethernet-phy@7 {
++		compatible = "ethernet-phy-ieee802.3-c22";
++		reg = <7>;
++	};
++};
++
++&mmc0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin>;
++	vmmc-supply = <&reg_vcc3v3>;
++	bus-width = <4>;
++	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>; /* PF6 */
++	status = "okay";
++};
++
++&ohci0 {
++	status = "okay";
++};
++
++&ohci1 {
++	status = "okay";
++};
++
++&ohci2 {
++	status = "okay";
++};
++
++&ohci3 {
++	status = "okay";
++};
++
++&uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart0_pins_a>;
++	status = "okay";
++};
++
++&uart1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart1_pins>;
++	status = "disabled";
++};
++
++&uart2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart2_pins>;
++	status = "disabled"; /* for OLED Hat Keys */
++};
++
++&usb_otg {
++	dr_mode = "otg";
++	status = "okay";
++};
++
++&usbphy {
++	/* USB Type-A port's VBUS is always on */
++	usb0_id_det-gpios = <&pio 6 12 GPIO_ACTIVE_HIGH>; /* PG12 */
++	usb0_vbus-supply = <&reg_usb0_vbus>;
++	status = "okay";
++};
++
++
++&spi0 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&spi0_pins &spi0_cs_pins>;
++	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>;
++
++	spiflash: spiflash@0 {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		reg = <0>;
++
++		compatible = "jedec,spi-nor";
++		spi-max-frequency = <24000000>;
++		status = "okay";
++
++		partition@0 {
++			reg = <0x0 0x00800000>;
++			label = "whole";
++		};
++
++		partition@1 {
++			reg = <0x0 0x90000>;
++			label = "uboot";
++		};
++
++		partition@2 {
++			reg = <0x90000 0x4000>;
++			label = "uboot_env";
++		};
++
++		partition@3 {
++			reg = <0x94000 0x1000>;
++			label = "openwrt_scr";
++		};
++
++		partition@4 {
++			reg = <0x95000 0x6000>;
++			label = "dtb";
++		};
++
++		partition@5 {
++			reg = <0x9b000 0x60000>;
++			label = "font";
++		};
++
++		partition@6 {
++			reg = <0xfb000 0x705000>;
++			label = "firmware";
++		};
++
++		partition@7 {
++			reg = <0xfb000 0x2e0000>;
++			label = "kernel";
++		};
++
++		partition@8 {
++			reg = <0x3db000 0x425000>;
++			label = "rootfs";
++		};
++	};
++};
++
++&i2c0 {
++    clock-frequency = <400000>;
++    status = "okay";
++
++    oled-ssd1306@3c {
++        compatible = "soloman,ssd1306-i2c";
++        reg = <0x3c>;
++        flip_vertical = <0>;
++	memory-region = <&oled_ssd1306_reserved>;
++    };
++};
++
++&pio {
++	oled_hat_pins: oled_hat_pins@0 {
++		pins = "PA0", "PA2", "PA3";
++		function = "gpio_in";
++	};
++
++	spi0_cs_pins: spi0_cs_pins {
++		pins = "PC3", "PA6";
++		function = "gpio_out";
++	};
++};
++
++&r_pio {
++	vdd_cpux_r_npi: regulator_pins@0 {
++		allwinner,pins = "PL6";
++		allwinner,function = "gpio_out";
++		allwinner,drive = <SUN4I_PINCTRL_10_MA>;
++		allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
++	};
++};
++
