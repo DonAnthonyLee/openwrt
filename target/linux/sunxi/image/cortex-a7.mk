@@ -147,13 +147,9 @@ endef
 
 TARGET_DEVICES += sun8i-h3-nanopi-neo
 
-IEEE8021X := wpad-mini
-RTL8192CU := $(IEEE8021X) kmod-rtl8192cu
-ATH9K_HTC := $(IEEE8021X) kmod-ath9k-htc
-
 define Device/sun8i-h3-nanopi-neo-oled-spi
   DEVICE_TITLE:=FriendlyElec NanoPi NEO with OLED Hat & SPI Nor Flash Boot
-  DEVICE_PACKAGES:=kmod-input-gpio-keys kmod-input-evdev kmod-oled_ssd1306 luci-app-usb_gadget $(RTL8192CU) $(ATH9K_HTC)
+  DEVICE_PACKAGES:=kmod-input-gpio-keys kmod-input-evdev kmod-oled_ssd1306 luci-app-usb_gadget wpad-mini
   SUPPORTED_DEVICES:=friendlyarm,nanopi-neo
   SUNXI_DTS:=sun8i-h3-nanopi-neo-oled-spi
 endef

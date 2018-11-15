@@ -27,13 +27,9 @@ endef
 
 TARGET_DEVICES += sun50i-h5-nanopi-neo2
 
-IEEE8021X := wpad-mini
-RTL8192CU := $(IEEE8021X) kmod-rtl8192cu
-ATH9K_HTC := $(IEEE8021X) kmod-ath9k-htc
-
 define Device/sun50i-h5-nanopi-neo2-oled-spi
   DEVICE_TITLE:=FriendlyElec Nanopi NEO2 with OLED Hat & SPI Nor Flash Boot
-  DEVICE_PACKAGES:=kmod-input-gpio-keys kmod-input-evdev kmod-oled_ssd1306 luci-app-usb_gadget $(RTL8192CU) $(ATH9K_HTC)
+  DEVICE_PACKAGES:=kmod-input-gpio-keys kmod-input-evdev kmod-oled_ssd1306 luci-app-usb_gadget wpad-mini
   SUPPORTED_DEVICES:=nanopi-neo2
   SUNXI_DTS:=allwinner/sun50i-h5-nanopi-neo2-oled-spi
   KERNEL_NAME := Image
