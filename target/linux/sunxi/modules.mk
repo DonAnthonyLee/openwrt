@@ -71,9 +71,9 @@ $(eval $(call KernelPackage,sun4i-emac))
 
 define KernelPackage/sound-soc-sunxi
   TITLE:=AllWinner built-in SoC sound support
-  KCONFIG:=CONFIG_SND_SUN4I_CODEC
-  FILES:=$(LINUX_DIR)/sound/soc/sunxi/sun4i-codec.ko
-  AUTOLOAD:=$(call AutoLoad,65,sun4i-codec)
+  KCONFIG:=CONFIG_SND_SUN4I_CODEC CONFIG_SND_SUN8I_CODEC_ANALOG
+  FILES:=$(LINUX_DIR)/sound/soc/sunxi/sun4i-codec.ko $(LINUX_DIR)/sound/soc/sunxi/sun8i-codec-analog.ko
+  AUTOLOAD:=$(call AutoLoad,65,sun4i-codec) $(call AutoLoad,64,sun8i-codec-analog)
   DEPENDS:=@TARGET_sunxi +kmod-sound-soc-core
   $(call AddDepends/sound)
 endef
