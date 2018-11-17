@@ -49,7 +49,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-
  
  / {
  	aliases {
-@@ -94,6 +96,82 @@
+@@ -95,6 +97,82 @@
  			gpios = <&r_pio 0 3 GPIO_ACTIVE_LOW>;
  		};
  	};
@@ -132,7 +132,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-
  };
  
  &ehci0 {
-@@ -164,6 +242,13 @@
+@@ -165,6 +243,13 @@
  		pins = "PL3";
  		function = "gpio_in";
  	};
