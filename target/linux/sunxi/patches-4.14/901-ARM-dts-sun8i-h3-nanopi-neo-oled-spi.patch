@@ -282,32 +282,32 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
 +    };
 +
 +    partition@2 {
-+        reg = <0x70000 0x8000>;
++        reg = <0x70000 0x4000>;
 +        label = "uboot_env";
 +    };
 +
 +    partition@3 {
-+        reg = <0x78000 0x1000>;
++        reg = <0x74000 0x1000>;
 +        label = "openwrt_scr";
 +    };
 +
 +    partition@4 {
-+        reg = <0x79000 0x7000>;
++        reg = <0x75000 0x6000>;
 +        label = "dtb";
 +    };
 +
 +    partition@5 {
-+        reg = <0x80000 0x60000>;
++        reg = <0x7b000 0x60000>;
 +        label = "font";
 +    };
 +
 +    partition@6 {
-+        reg = <0xe0000 0x2e0000>;
++        reg = <0xdb000 0x2e0000>;
 +        label = "kernel";
 +    };
 +
 +    partition@7 {
-+        reg = <0x3c0000 0x440000>;
++        reg = <0x3bb000 0x445000>;
 +        label = "rootfs";
 +    };
 +};
