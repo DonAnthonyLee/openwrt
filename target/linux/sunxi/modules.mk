@@ -68,20 +68,26 @@ endef
 
 $(eval $(call KernelPackage,sun4i-emac))
 
+define KernelPackage/sound-soc-sun8i-codec-analog
+  TITLE:=Allwinner sun8i Codec Analog Controls Support
+  KCONFIG:=CONFIG_SND_SUN8I_CODEC_ANALOG
+  FILES:=$(LINUX_DIR)/sound/soc/sunxi/sun8i-codec-analog.ko
+  AUTOLOAD:=$(call AutoLoad,64,sun8i-codec-analog)
+  DEPENDS:=@TARGET_sunxi +kmod-sound-soc-core
+  $(call AddDepends/sound)
+endef
+
+define KernelPackage/sound-soc-sun8i-codec-analog/description
+  Kernel support for Allwinner sun8i Codec Analog Controls
+endef
+
+$(eval $(call KernelPackage,sound-soc-sun8i-codec-analog))
+
 define KernelPackage/sound-soc-sunxi
   TITLE:=AllWinner built-in SoC sound support
-  KCONFIG:=\
-	CONFIG_SND_HRTIMER=y \
-	CONFIG_SND_SUPPORT_OLD_API=y \
-	CONFIG_SND_SEQ_HRTIMER_DEFAULT=y \
-	CONFIG_SND_PCM_OSS_PLUGINS=y \
-	CONFIG_SND_PCM_TIMER=y \
-	CONFIG_SND_SUN4I_CODEC \
-	CONFIG_SND_SUN8I_CODEC_ANALOG
-  FILES:=$(LINUX_DIR)/sound/soc/sunxi/sun4i-codec.ko $(LINUX_DIR)/sound/soc/sunxi/sun8i-codec-analog.ko
-  AUTOLOAD:=$(call AutoLoad,65,\
-		sun8i-codec-analog \
-		sun4i-codec)
+  KCONFIG:=CONFIG_SND_SUN4I_CODEC
+  FILES:=$(LINUX_DIR)/sound/soc/sunxi/sun4i-codec.ko
+  AUTOLOAD:=$(call AutoLoad,65,sun4i-codec)
   DEPENDS:=@TARGET_sunxi +kmod-sound-soc-core
   $(call AddDepends/sound)
 endef
@@ -93,21 +99,24 @@ endef
 $(eval $(call KernelPackage,sound-soc-sunxi))
 
 define KernelPackage/sound-soc-sun8i-i2s
-  TITLE:=AllWinner sun8i built-in SoC I2S sound support
+  TITLE:=AllWinner sun8i I2S support
   KCONFIG:=\
 	CONFIG_SND_SUN8I_I2S \
-	CONFIG_SND_SIMPLE_CARD=y \
-	CONFIG_SND_SIMPLE_CARD_UTILS=y
-  FILES:=$(LINUX_DIR)/sound/soc/sunxi/sun8i-i2s.ko $(LINUX_DIR)/sound/soc/codecs/snd-soc-pcm5102a.ko
-  AUTOLOAD:=$(call AutoLoad,60,\
+	CONFIG_SND_SOC_PCM5102A \
+	CONFIG_SND_SOC_WM8960 \
+	CONFIG_SND_SOC_WM8978
+  FILES:=$(LINUX_DIR)/sound/soc/sunxi/sun8i-i2s.ko $(LINUX_DIR)/sound/soc/codecs/snd-soc-pcm5102a.ko $(LINUX_DIR)/sound/soc/codecs/snd-soc-wm8960.ko $(LINUX_DIR)/sound/soc/codecs/snd-soc-wm8978.ko
+  AUTOLOAD:=$(call AutoLoad,66,\
 		snd-soc-pcm5102a \
+		snd-soc-wm8960 \
+		snd-soc-wm8978 \
 		sun8i-i2s)
   DEPENDS:=@TARGET_sunxi +kmod-sound-soc-core
   $(call AddDepends/sound)
 endef
 
 define KernelPackage/sound-soc-sun8i-i2s/description
-  Kernel support for AllWinner sun8i built-in SoC I2S audio
+  Kernel support for AllWinner sun8i I2S
 endef
 
 $(eval $(call KernelPackage,sound-soc-sun8i-i2s))
