@@ -1,0 +1,112 @@
+diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi
+--- a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-11-26 03:05:34.561200140 +0800
++++ b/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-11-27 01:25:50.099737095 +0800
+@@ -58,6 +58,8 @@
+ 		i2c2 = &i2c2;
+ 		spi0 = &spi0;
+ 		spi1 = &spi1;
++		spidev0 = &spidev0;
++		spidev1 = &spidev1;
+ 		spiflash = &spiflash;
+ 		ethernet0 = &emac;
+ 		i2s0 = &i2s0;
+@@ -235,6 +237,11 @@
+ 		function = "gpio_out";
+ 	};
+ 
++	spi0_pins: spi0 {
++		pins = "PC0", "PC1", "PC2";
++		function = "spi0";
++	};
++
+ 	spi0_cs_pins: spi0_cs_pins {
+ 		pins = "PC3", "PA6";
+ 		function = "gpio_out";
+@@ -279,6 +286,22 @@
+ 	pinctrl-0 = <&spi0_pins &spi0_cs_pins>;
+ 	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>;
+ 
++	spidev0: spi@0 {
++		compatible = "nanopi,spidev";
++		reg = <0>;
++		status = "disabled";
++
++		spi-max-frequency = <10000000>;
++	};
++
++	spidev1: spi@1 {
++		compatible = "nanopi,spidev";
++		reg = <1>;
++		status = "disabled";
++
++		spi-max-frequency = <10000000>;
++	};
++
+ 	spiflash: spiflash@0 {
+ 		#address-cells = <1>;
+ 		#size-cells = <1>;
+diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts
+--- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-26 03:05:34.561200140 +0800
++++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-27 01:27:00.737405848 +0800
+@@ -107,6 +107,11 @@
+ 	status = "okay";
+ };
+ 
++&spidev1 {
++    /* use PA6 as CS pin */
++    status = "okay";
++};
++
+ &spiflash {
+     compatible = "jedec,spi-nor";
+     spi-max-frequency = <24000000>;
+diff -Nur a/drivers/spi/spidev.c b/drivers/spi/spidev.c
+--- a/drivers/spi/spidev.c	2018-11-26 03:05:33.413213691 +0800
++++ b/drivers/spi/spidev.c	2018-11-27 01:27:37.370193969 +0800
+@@ -670,6 +670,7 @@
+ 	{ .compatible = "ge,achc" },
+ 	{ .compatible = "semtech,sx1301" },
+ 	{ .compatible = "siliconlabs,si3210" },
++	{ .compatible = "nanopi,spidev" },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, spidev_dt_ids);
+diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-11-27 01:20:45.617570233 +0800
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-11-27 01:47:07.265575178 +0800
+@@ -57,6 +57,7 @@
+ 		i2c0 = &i2c0;
+ 		i2c1 = &i2c1;
+ 		spi0 = &spi0;
++		spidev1 = &spidev1;
+ 		spiflash = &spiflash;
+ 		ethernet0 = &emac;
+ 		i2s0 = &i2s0;
+@@ -343,6 +344,15 @@
+ 	pinctrl-0 = <&spi0_pins &spi0_cs_pins>;
+ 	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>;
+ 
++	spidev1: spi@1 {
++		/* use PA6 as CS pin */
++		compatible = "nanopi,spidev";
++		reg = <1>;
++		status = "okay";
++
++		spi-max-frequency = <10000000>;
++	};
++
+ 	spiflash: spiflash@0 {
+ 		#address-cells = <1>;
+ 		#size-cells = <1>;
+@@ -412,6 +422,11 @@
+ 		function = "gpio_in";
+ 	};
+ 
++	spi0_pins: spi0 {
++		pins = "PC0", "PC1", "PC2";
++		function = "spi0";
++	};
++
+ 	spi0_cs_pins: spi0_cs_pins {
+ 		pins = "PC3", "PA6";
+ 		function = "gpio_out";
