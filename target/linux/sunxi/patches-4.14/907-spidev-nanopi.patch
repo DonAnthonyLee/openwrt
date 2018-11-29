@@ -60,17 +60,6 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
  &spiflash {
      compatible = "jedec,spi-nor";
      spi-max-frequency = <24000000>;
-diff -Nur a/drivers/spi/spidev.c b/drivers/spi/spidev.c
---- a/drivers/spi/spidev.c	2018-11-26 03:05:33.413213691 +0800
-+++ b/drivers/spi/spidev.c	2018-11-27 01:27:37.370193969 +0800
-@@ -670,6 +670,7 @@
- 	{ .compatible = "ge,achc" },
- 	{ .compatible = "semtech,sx1301" },
- 	{ .compatible = "siliconlabs,si3210" },
-+	{ .compatible = "nanopi,spidev" },
- 	{},
- };
- MODULE_DEVICE_TABLE(of, spidev_dt_ids);
 diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-11-27 01:20:45.617570233 +0800
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-11-27 01:47:07.265575178 +0800
@@ -110,3 +99,33 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
  	spi0_cs_pins: spi0_cs_pins {
  		pins = "PC3", "PA6";
  		function = "gpio_out";
+diff -Nur a/drivers/spi/spi-sun6i.c b/drivers/spi/spi-sun6i.c
+--- a/drivers/spi/spi-sun6i.c	2018-11-14 03:15:18.000000000 +0800
++++ b/drivers/spi/spi-sun6i.c	2018-11-29 17:52:23.202911410 +0800
+@@ -180,14 +180,16 @@
+ 	struct sun6i_spi *sspi = spi_master_get_devdata(spi->master);
+ 	u32 reg;
+ 
++	enable = !enable; // ODD!!! see driver/spi/spi.c::spi_set_cs()
++
+ 	reg = sun6i_spi_read(sspi, SUN6I_TFR_CTL_REG);
+ 	reg &= ~SUN6I_TFR_CTL_CS_MASK;
+ 	reg |= SUN6I_TFR_CTL_CS(spi->chip_select);
+ 
+ 	if (enable)
+-		reg |= SUN6I_TFR_CTL_CS_LEVEL;
+-	else
+ 		reg &= ~SUN6I_TFR_CTL_CS_LEVEL;
++	else
++		reg |= SUN6I_TFR_CTL_CS_LEVEL;
+ 
+ 	sun6i_spi_write(sspi, SUN6I_TFR_CTL_REG, reg);
+ }
+@@ -485,6 +487,7 @@
+ 	master->dev.of_node = pdev->dev.of_node;
+ 	master->auto_runtime_pm = true;
+ 	master->max_transfer_size = sun6i_spi_max_transfer_size;
++	master->flags = SPI_MASTER_GPIO_SS;
+ 
+ 	sspi->hclk = devm_clk_get(&pdev->dev, "ahb");
+ 	if (IS_ERR(sspi->hclk)) {
