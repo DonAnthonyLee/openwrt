@@ -10,7 +10,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-
  		spiflash = &spiflash;
  		ethernet0 = &emac;
  		i2s0 = &i2s0;
-@@ -235,6 +237,11 @@
+@@ -235,9 +237,15 @@
  		function = "gpio_out";
  	};
  
@@ -22,7 +22,11 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-
  	spi0_cs_pins: spi0_cs_pins {
  		pins = "PC3", "PA6";
  		function = "gpio_out";
-@@ -279,6 +286,22 @@
++		bias-pull-up;
+ 	};
+ };
+ 
+@@ -279,6 +287,22 @@
  	pinctrl-0 = <&spi0_pins &spi0_cs_pins>;
  	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>;
  
@@ -60,6 +64,17 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
  &spiflash {
      compatible = "jedec,spi-nor";
      spi-max-frequency = <24000000>;
+diff -Nur a/drivers/spi/spidev.c b/drivers/spi/spidev.c
+--- a/drivers/spi/spidev.c     2018-11-26 03:05:33.413213691 +0800
++++ b/drivers/spi/spidev.c     2018-11-27 01:27:37.370193969 +0800
+@@ -670,6 +670,7 @@
+ 	{ .compatible = "ge,achc" },
+ 	{ .compatible = "semtech,sx1301" },
+ 	{ .compatible = "siliconlabs,si3210" },
++	{ .compatible = "nanopi,spidev" },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, spidev_dt_ids);
 diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-11-27 01:20:45.617570233 +0800
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-11-27 01:47:07.265575178 +0800
@@ -87,7 +102,7 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
  	spiflash: spiflash@0 {
  		#address-cells = <1>;
  		#size-cells = <1>;
-@@ -412,6 +422,11 @@
+@@ -412,9 +422,15 @@
  		function = "gpio_in";
  	};
  
@@ -99,6 +114,10 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
  	spi0_cs_pins: spi0_cs_pins {
  		pins = "PC3", "PA6";
  		function = "gpio_out";
++		bias-pull-up;
+ 	};
+ };
+ 
 diff -Nur a/drivers/spi/spi-sun6i.c b/drivers/spi/spi-sun6i.c
 --- a/drivers/spi/spi-sun6i.c	2018-11-14 03:15:18.000000000 +0800
 +++ b/drivers/spi/spi-sun6i.c	2018-11-29 17:52:23.202911410 +0800
