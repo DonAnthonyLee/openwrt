@@ -156,7 +156,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-
 diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts
 --- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-02 14:29:14.933699658 +0800
 +++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-02 13:51:26.047239730 +0800
-@@ -0,0 +1,182 @@
+@@ -0,0 +1,186 @@
 +/*
 + * Copyright (C) 2016 James Pettigrew <james@innovum.com.au>
 + *
@@ -210,8 +210,12 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
 +		#size-cells = <1>;
 +		ranges;
 +
-+		oled_ssd1306_reserved: oled-ssd1306@3c {
-+			reg = <0x4b060000 0x1a0000>;
++		lbk_fonts : lbk_fonts@0 {
++			reg = <0x4b060000 0x197200>;
++		};
++
++		oled_ssd1306_buffer : oled-ssd1306@3c {
++			reg = <0x4b1ffc00 0x400>;
 +		};
 +	};
 +
@@ -320,7 +324,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
 +        compatible = "soloman,ssd1306-i2c";
 +        reg = <0x3c>;
 +        flip_vertical = <0>;
-+	memory-region = <&oled_ssd1306_reserved>;
++        buffer = <&oled_ssd1306_buffer>;
 +    };
 +};
 +
