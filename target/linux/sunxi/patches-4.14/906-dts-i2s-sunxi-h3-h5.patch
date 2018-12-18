@@ -74,7 +74,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-
 diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts
 --- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-23 10:36:25.567069306 +0800
 +++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-23 11:05:08.663200395 +0800
-@@ -165,6 +165,10 @@
+@@ -169,6 +169,10 @@
      };
  };
  
@@ -100,7 +100,7 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
  	};
  
  	reserved-memory {
-@@ -163,8 +165,13 @@
+@@ -167,8 +169,13 @@
  		states = <1100000 0x0
  			  1100000 0x1>;
  	};
@@ -115,7 +115,7 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
  
  &cpu0 {
  	operating-points = <
-@@ -230,6 +237,11 @@
+@@ -234,6 +241,11 @@
  	status = "okay";
  };
  
@@ -127,7 +127,7 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
  &ehci0 {
  	status = "okay";
  };
-@@ -300,6 +312,10 @@
+@@ -304,6 +316,10 @@
  	status = "disabled";
  };
  
@@ -138,7 +138,7 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
  &uart2 {
  	pinctrl-names = "default";
  	pinctrl-0 = <&uart2_pins>;
-@@ -318,7 +334,6 @@
+@@ -322,7 +338,6 @@
  	status = "okay";
  };
  

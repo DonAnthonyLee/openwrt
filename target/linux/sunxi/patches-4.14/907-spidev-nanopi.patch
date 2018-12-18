@@ -52,7 +52,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-
 diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts
 --- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-26 03:05:34.561200140 +0800
 +++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-11-27 01:27:00.737405848 +0800
-@@ -107,6 +107,11 @@
+@@ -111,6 +111,11 @@
  	status = "okay";
  };
  
@@ -86,7 +86,7 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
  		spiflash = &spiflash;
  		ethernet0 = &emac;
  		i2s0 = &i2s0;
-@@ -343,6 +344,15 @@
+@@ -347,6 +348,15 @@
  	pinctrl-0 = <&spi0_pins &spi0_cs_pins>;
  	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>;
  
@@ -102,7 +102,7 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
  	spiflash: spiflash@0 {
  		#address-cells = <1>;
  		#size-cells = <1>;
-@@ -412,9 +422,15 @@
+@@ -416,9 +426,15 @@
  		function = "gpio_in";
  	};
  
