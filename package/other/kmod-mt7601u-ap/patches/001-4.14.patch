@@ -1,0 +1,506 @@
+diff --git a/Makefile.inc b/Makefile.inc
+index ed4b88f..ffc93b1 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -1,4 +1,4 @@
+-WIFI_MODE = AP
++WIFI_MODE := APSTA
+ 
+ ifeq ($(WIFI_MODE),)
+ RT28xx_MODE = STA
+@@ -29,7 +29,8 @@ include $(RT28xx_DIR)/os/linux/config.mk
+ RTMP_SRC_DIR = $(RT28xx_DIR)/RT$(MODULE)
+ 
+ #PLATFORM: Target platform
+-PLATFORM = PC
++PLATFORM := PC
++#PLATFORM = OPENWRT
+ #PLATFORM = 5VT
+ #PLATFORM = IKANOS_V160
+ #PLATFORM = IKANOS_V180
+@@ -377,7 +378,11 @@ else
+ 
+ ifeq ($(OSABL),YES)
+ 	cp -f os/linux/Makefile.6.util $(RT28xx_DIR)/os/linux/Makefile
++ifeq ($(PLATFORM),OPENWRT)
++	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
++else
+ 	$(MAKE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
++endif
+ endif
+ 
+ 	cp -f os/linux/Makefile.6 $(RT28xx_DIR)/os/linux/Makefile
+@@ -386,15 +391,23 @@ ifeq ($(PLATFORM),DM6446)
+ else
+ ifeq ($(PLATFORM),FREESCALE8377)
+ 	$(MAKE) ARCH=powerpc CROSS_COMPILE=$(CROSS_COMPILE) -C  $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
++else
++ifeq ($(PLATFORM),OPENWRT)
++	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
+ else
+ 	$(MAKE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
+ endif
+ endif
++endif
+ 
+ ifeq ($(OSABL),YES)
+ 	cp -f os/linux/Makefile.6.netif $(RT28xx_DIR)/os/linux/Makefile
++ifeq ($(PLATFORM),OPENWRT)
++	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
++else
+ 	$(MAKE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
+ endif
++endif
+ 
+ ifeq ($(RT28xx_MODE),AP)
+ ifneq ($(findstring 7601,$(CHIPSET)),)
+@@ -498,7 +511,11 @@ ifneq (,$(findstring 2.4,$(LINUX_SRC)))
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux/
+ else
+ 	cp -f os/linux/Makefile.libwapi.6 $(RT28xx_DIR)/os/linux/Makefile	
++ifeq ($(PLATFORM),OPENWRT)
++	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
++else
+ 	$(MAKE) -C  $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules	
++endif
+ endif	
+ 
+ osutil:
+@@ -508,9 +525,13 @@ ifneq (,$(findstring 2.4,$(LINUX_SRC)))
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux/
+ else
+ 	cp -f os/linux/Makefile.6.util $(RT28xx_DIR)/os/linux/Makefile
++ifeq ($(PLATFORM),OPENWRT)
++	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
++else
+ 	$(MAKE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
+ endif
+ endif
++endif
+ 
+ osnet:
+ ifeq ($(OSABL),YES)
+@@ -519,9 +540,13 @@ ifneq (,$(findstring 2.4,$(LINUX_SRC)))
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux/
+ else
+ 	cp -f os/linux/Makefile.6.netif $(RT28xx_DIR)/os/linux/Makefile
++ifeq ($(PLATFORM),OPENWRT)
++	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
++else
+ 	$(MAKE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
+ endif
+ endif
++endif
+ 
+ osdrv:
+ ifneq (,$(findstring 2.4,$(LINUX_SRC)))
+@@ -529,8 +554,12 @@ ifneq (,$(findstring 2.4,$(LINUX_SRC)))
+ 	$(MAKE) -C $(RT28xx_DIR)/os/linux/
+ else
+ 	cp -f os/linux/Makefile.6 $(RT28xx_DIR)/os/linux/Makefile
++ifeq ($(PLATFORM),OPENWRT)
++	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
++else
+ 	$(MAKE) -C $(LINUX_SRC) SUBDIRS=$(RT28xx_DIR)/os/linux modules
+ endif
++endif
+ 
+ # Declare the contents of the .PHONY variable as phony.  We keep that information in a variable
+ .PHONY: $(PHONY)
+diff --git a/config.mk b/config.mk
+index 1d3b5ab..960e197 100644
+--- a/config.mk
++++ b/config.mk
+@@ -1324,6 +1324,10 @@ ifeq ($(PLATFORM),PC)
+     endif
+ endif
+ 
++ifeq ($(PLATFORM),OPENWRT)
++	EXTRA_CFLAGS := $(WFLAGS)
++endif
++
+ ifeq ($(PLATFORM),INTELP6)
+ 	EXTRA_CFLAGS := $(WFLAGS) 
+ endif
+diff --git a/src/ate/common/ate_usb.c b/src/ate/common/ate_usb.c
+index a7cd163..d50cffa 100644
+--- a/src/ate/common/ate_usb.c
++++ b/src/ate/common/ate_usb.c
+@@ -552,7 +552,7 @@ INT ATEResetBulkOut(
+ 	IN PRTMP_ADAPTER	pAd)
+ {
+ 	PATE_INFO pATEInfo = &(pAd->ate);
+-	PTX_CONTEXT	pNullContext = &(pAd->NullContext);
++	PTX_CONTEXT	pNullContext = pAd->NullContext;
+ 	INT ret=0;
+ 
+ 	pNullContext->IRPPending = TRUE;
+diff --git a/src/ate/common/rt_ate.c b/src/ate/common/rt_ate.c
+index 2aa4b9b..3c671c6 100644
+--- a/src/ate/common/rt_ate.c
++++ b/src/ate/common/rt_ate.c
+@@ -4306,7 +4306,7 @@ INT Set_ATE_Load_E2P_From_Buf_Proc(
+ 	if (value > 0)
+ 	{
+ 
+-		rt_ee_write_all(pAd, pAd->EEPROMImage);
++		rt_ee_write_all(pAd, (USHORT*)pAd->EEPROMImage);
+ 		ret = TRUE;
+ 	
+ 	}
+diff --git a/src/ate/include/rt_ate.h b/src/ate/include/rt_ate.h
+index 06e8739..ae1177a 100644
+--- a/src/ate/include/rt_ate.h
++++ b/src/ate/include/rt_ate.h
+@@ -39,7 +39,7 @@ typedef struct _ATE_CHIP_STRUCT {
+ 	VOID	(*AsicSetTxRxPath)(PRTMP_ADAPTER pAd);
+ 	VOID	(*AdjustTxPower)(PRTMP_ADAPTER pAd);
+ 	VOID	(*AsicExtraPowerOverMAC)(PRTMP_ADAPTER pAd);
+-	VOID 	(*TemperCompensation)(PRTMP_ADAPTER *pAd);
++	VOID 	(*TemperCompensation)(PRTMP_ADAPTER pAd);
+ 	
+ 	/* command handlers */
+ 	INT		(*Set_BW_Proc)(PRTMP_ADAPTER pAd, PSTRING arg);
+diff --git a/src/chips/mt7601.c b/src/chips/mt7601.c
+index cc96e47..0fe7602 100644
+--- a/src/chips/mt7601.c
++++ b/src/chips/mt7601.c
+@@ -3331,7 +3331,7 @@ VOID MT7601_Init(RTMP_ADAPTER *pAd)
+ 	pChipOps->SetRxAnt = MT7601SetRxAnt;
+ 
+ 
+-	pChipOps->DisableTxRx = MT7601DisableTxRx;
++	pChipOps->DisableTxRx = (VOID (*)(PRTMP_ADAPTER, UCHAR))MT7601DisableTxRx;
+ 
+ #ifdef RTMP_USB_SUPPORT
+ 	pChipOps->AsicRadioOn = MT7601UsbAsicRadioOn;
+diff --git a/src/common/cmm_cfg.c b/src/common/cmm_cfg.c
+index 6032606..5bc6ddb 100644
+--- a/src/common/cmm_cfg.c
++++ b/src/common/cmm_cfg.c
+@@ -27,31 +27,6 @@
+ 
+ 
+ #include "rt_config.h"
+-#ifdef DOT11_N_SUPPORT
+-#if defined(RT65xx) || defined(MT7601)
+-#define MAX_AGG_CNT	32
+-#elif defined(RT2883) || defined(RT3883)
+-#define MAX_AGG_CNT	16
+-#else
+-#define MAX_AGG_CNT	8
+-#endif
+-/* DisplayTxAgg - display Aggregation statistics from MAC */
+-void DisplayTxAgg (RTMP_ADAPTER *pAd)
+-{
+-	ULONG totalCount;
+-	ULONG aggCnt[MAX_AGG_CNT + 2];
+-	int i;
+-
+-	AsicReadAggCnt(pAd, aggCnt, sizeof(aggCnt) / sizeof(ULONG));
+-	totalCount = aggCnt[0] + aggCnt[1];
+-	if (totalCount > 0)
+-		for (i=0; i<MAX_AGG_CNT; i++) {
+-			DBGPRINT(RT_DEBUG_OFF, ("\t%d MPDU=%ld (%ld%%)\n", i+1, aggCnt[i+2], aggCnt[i+2]*100/totalCount));
+-		}
+-	printk("====================\n");
+-
+-}
+-#endif /* DOT11_N_SUPPORT */
+ 
+ static BOOLEAN RT_isLegalCmdBeforeInfUp(
+        IN PSTRING SetCmd);
+diff --git a/src/common/cmm_mac_usb.c b/src/common/cmm_mac_usb.c
+index 4316d38..665b1f0 100644
+--- a/src/common/cmm_mac_usb.c
++++ b/src/common/cmm_mac_usb.c
+@@ -16,8 +16,29 @@
+ #ifdef RTMP_MAC_USB
+ 
+ 
++#ifdef OS_ABL_SUPPORT
++#include	<linux/module.h>
++#include	<linux/kernel.h>
++#endif
++
+ #include	"rt_config.h"
+ 
++#ifdef OS_ABL_SUPPORT
++MODULE_LICENSE("GPL");
++void *usb_alloc_coherent(struct usb_device *dev, size_t size, gfp_t mem_flags, dma_addr_t *dma);
++
++void *rausb_buffer_alloc_xxx(VOID *dev, size_t size, ra_dma_addr_t *dma)
++{
++	dma_addr_t DmaAddr = (dma_addr_t)(*dma);
++	void *buf;
++
++	buf = usb_alloc_coherent(dev, size, GFP_KERNEL, &DmaAddr);
++	*dma = (ra_dma_addr_t)DmaAddr;
++	return buf;
++}
++#undef RTUSB_URB_ALLOC_BUFFER
++#define RTUSB_URB_ALLOC_BUFFER	rausb_buffer_alloc_xxx
++#endif
+ 
+ static NDIS_STATUS RTMPAllocUsbBulkBufStruct(
+ 	IN RTMP_ADAPTER *pAd,
+@@ -36,10 +57,10 @@ static NDIS_STATUS RTMPAllocUsbBulkBufStruct(
+ 		DBGPRINT(RT_DEBUG_ERROR, ("<-- ERROR in Alloc urb struct for %s !\n", pBufName));
+ 		return NDIS_STATUS_RESOURCES;
+ 	}
+-	
++
+ 	*ppXBuffer = RTUSB_URB_ALLOC_BUFFER(pObj->pUsb_Dev, bufLen, pDmaAddr);
+ 	if (*ppXBuffer == NULL) {
+-		DBGPRINT(RT_DEBUG_ERROR, ("<-- ERROR in Alloc Bulk buffer for %s!\n", pBufName));
++		DBGPRINT(RT_DEBUG_ERROR, ("<-- ERROR in Alloc Bulk buffer for %s(len=%u)!\n", pBufName, bufLen));
+ 		return NDIS_STATUS_RESOURCES;
+ 	}
+ 	
+@@ -547,7 +568,7 @@ NDIS_STATUS	RTMPAllocTxRxRingMemory(
+ 	IN	PRTMP_ADAPTER	pAd)
+ {	
+ 	NDIS_STATUS Status = NDIS_STATUS_FAILURE;
+-	PTX_CONTEXT pNullContext   = &(pAd->NullContext);
++	PTX_CONTEXT pNullContext   = pAd->NullContext;
+ 	PTX_CONTEXT pPsPollContext = &(pAd->PsPollContext);
+ 	PCMD_RSP_CONTEXT pCmdRspEventContext = &(pAd->CmdRspEventContext);
+ 	INT i, acidx;
+diff --git a/src/common/rtusb_bulk.c b/src/common/rtusb_bulk.c
+index e8df7aa..c2e1842 100644
+--- a/src/common/rtusb_bulk.c
++++ b/src/common/rtusb_bulk.c
+@@ -1698,7 +1698,7 @@ VOID	RTUSBCancelPendingBulkOutIRP(
+ 	pAd->BulkOutPending[MGMTPIPEIDX] = FALSE;
+ 	/*RTMP_IRQ_UNLOCK(pLock, IrqFlags);*/
+ 
+-	pNullContext = &(pAd->NullContext);
++	pNullContext = pAd->NullContext;
+ 	if (pNullContext->IRPPending == TRUE)
+ 		RTUSB_UNLINK_URB(pNullContext->pUrb);
+ 
+diff --git a/src/include/os/rt_linux.h b/src/include/os/rt_linux.h
+index 7c217bf..4ea6193 100644
+--- a/src/include/os/rt_linux.h
++++ b/src/include/os/rt_linux.h
+@@ -83,6 +83,8 @@
+ #include <linux/kthread.h>
+ #endif /* KTHREAD_SUPPORT */
+ 
++/* For usage of kill_pid and friends. */
++#include <linux/sched/signal.h>
+ 
+ #include "os/rt_linux_cmm.h"
+ 
+diff --git a/src/mcu/rtmp_mcu.c b/src/mcu/rtmp_mcu.c
+index 4359bc3..ff75e67 100644
+--- a/src/mcu/rtmp_mcu.c
++++ b/src/mcu/rtmp_mcu.c
+@@ -30,7 +30,7 @@
+ 
+ INT MCUBurstWrite(PRTMP_ADAPTER pAd, UINT32 Offset, UINT32 *Data, UINT32 Cnt)
+ {
+-	RTUSBMultiWrite_nBytes(pAd, Offset, Data, Cnt * 4, 64); 
++	RTUSBMultiWrite_nBytes(pAd, Offset, (PUCHAR)Data, Cnt * 4, 64); 
+ }
+ 
+ INT MCURandomWrite(PRTMP_ADAPTER pAd, RTMP_REG_PAIR *RegPair, UINT32 Num)
+@@ -62,15 +62,15 @@ VOID ChipOpsMCUHook(PRTMP_ADAPTER pAd, enum MCU_TYPE MCUType)
+ 		pChipOps->loadFirmware = USBLoadFirmwareToAndes;
+ #endif
+ 		//pChipOps->sendCommandToMcu = AsicSendCmdToAndes;
+-		pChipOps->Calibration = AndesCalibrationOP;
++		pChipOps->Calibration = (VOID (*)(PRTMP_ADAPTER, UINT32, UINT32))AndesCalibrationOP;
+ 		pChipOps->BurstWrite =  AndesBurstWrite;
+ 		pChipOps->BurstRead = AndesBurstRead;
+ 		pChipOps->RandomRead = AndesRandomRead;
+ 		pChipOps->RFRandomRead = AndesRFRandomRead;
+ 		pChipOps->ReadModifyWrite = AndesReadModifyWrite;
+ 		pChipOps->RFReadModifyWrite = AndesRFReadModifyWrite;
+-		pChipOps->RandomWrite = AndesRandomWrite;
+-		pChipOps->RFRandomWrite = AndesRFRandomWrite;
++		pChipOps->RandomWrite = (INT (*)(PRTMP_ADAPTER, RTMP_REG_PAIR*, UINT32))AndesRandomWrite;
++		pChipOps->RFRandomWrite = (INT (*)(PRTMP_ADAPTER, BANK_RF_REG_PAIR*, UINT32))AndesRFRandomWrite;
+ 		pChipOps->PwrSavingOP = AndesPwrSavingOP;
+ 	}
+ #endif
+diff --git a/src/os/linux/ap_ioctl.c b/src/os/linux/ap_ioctl.c
+index b2aad0d..b5a9285 100644
+--- a/src/os/linux/ap_ioctl.c
++++ b/src/os/linux/ap_ioctl.c
+@@ -313,7 +313,7 @@ INT rt28xx_ap_ioctl(
+ 			DBGPRINT(RT_DEBUG_TRACE,("ioctl SIOCSIWGENIE length=%d, pointer=%x\n", wrqin->u.data.length, wrqin->u.data.pointer));
+ 
+ 
+-			RTMP_AP_IoctlHandle(pAd, wrqin, CMD_RTPRIV_IOCTL_AP_SIOCSIWGENIE, 0, NULL, 0);
++			RTMP_AP_IoctlHandle(pAd, (RTMP_IOCTL_INPUT_STRUCT*)wrqin, CMD_RTPRIV_IOCTL_AP_SIOCSIWGENIE, 0, NULL, 0);
+ 			break;
+ #endif /* HOSTAPD_SUPPORT */
+ 
+diff --git a/src/os/linux/rt_linux.c b/src/os/linux/rt_linux.c
+index e26df14..eb09a01 100644
+--- a/src/os/linux/rt_linux.c
++++ b/src/os/linux/rt_linux.c
+@@ -1161,18 +1161,27 @@ void RtmpOSFileSeek(RTMP_OS_FD osfd, int offset)
+ 
+ int RtmpOSFileRead(RTMP_OS_FD osfd, char *pDataPtr, int readLen)
+ {
++#if 0
+ 	/* The object must have a read method */
+ 	if (osfd->f_op && osfd->f_op->read) {
+-		return osfd->f_op->read(osfd, pDataPtr, readLen, &osfd->f_pos);
++		//return osfd->f_op->read(osfd, pDataPtr, readLen, &osfd->f_pos);
++		return vfs_read(osfd, pDataPtr, readLen, &osfd->f_pos);
+ 	} else {
+ 		DBGPRINT(RT_DEBUG_ERROR, ("no file read method\n"));
+ 		return -1;
+ 	}
++#else
++	return kernel_read(osfd, pDataPtr, readLen, &osfd->f_pos);
++#endif
+ }
+ 
+ int RtmpOSFileWrite(RTMP_OS_FD osfd, char *pDataPtr, int writeLen)
+ {
++#if 0
+ 	return osfd->f_op->write(osfd, pDataPtr, (size_t) writeLen, &osfd->f_pos);
++#else
++	return kernel_write(osfd, pDataPtr, (size_t) writeLen, &osfd->f_pos);
++#endif
+ }
+ 
+ static inline void __RtmpOSFSInfoChange(OS_FS_INFO * pOSFSInfo, BOOLEAN bSet)
+@@ -2174,7 +2183,7 @@ VOID RtmpDrvAllRFPrint(
+ 		if (file_w->f_op && file_w->f_op->write) {
+ 			file_w->f_pos = 0;
+ 			/* write data to file */
+-			file_w->f_op->write(file_w, pBuf, BufLen, &file_w->f_pos);
++			file_w->f_op->write(file_w, (STRING *)pBuf, BufLen, &file_w->f_pos);
+ 		}
+ 		filp_close(file_w, NULL);
+ 	}
+@@ -4314,7 +4323,7 @@ VOID RtmpOsFreeSpinLock(NDIS_SPIN_LOCK *pLockOrg)
+ 	/* we will free all locks memory in RTMP_OS_FREE_LOCK() */
+ 	OS_NDIS_SPIN_LOCK *pLock;
+ 
+-	pLock = (OS_NDIS_MINIPORT_TIMER *) (pLockOrg->pContent);
++	pLock = (OS_NDIS_SPIN_LOCK *) (pLockOrg->pContent);
+ 	if (pLock != NULL) {
+ 		OS_NdisFreeSpinLock(pLock);
+ 
+diff --git a/src/os/linux/rt_profile.c b/src/os/linux/rt_profile.c
+index d8110b4..c308e53 100644
+--- a/src/os/linux/rt_profile.c
++++ b/src/os/linux/rt_profile.c
+@@ -128,7 +128,7 @@ char const *pWirelessWscEventText[IW_WSC_EVENT_TYPE_NUM] = {
+ #ifdef CONFIG_STA_SUPPORT
+ #ifdef IWSC_SUPPORT
+ // for IWSC wireless event messagechar 
+-const *pWirelessIWscEventText[IW_IWSC_EVENT_TYPE_NUM] = {
++const char *pWirelessIWscEventText[IW_IWSC_EVENT_TYPE_NUM] = {
+ 	"IWSC - T1 mins time out!",									/* IW_IWSC_T1_TIMER_TIMEOUT */
+ 	"IWSC - T2 mins time out!",									/* IW_IWSC_T2_TIMER_TIMEOUT */
+ 	"IWSC - Become Registrar",									/* IW_IWSC_BECOME_REGISTRAR */
+diff --git a/src/os/linux/rt_usb.c b/src/os/linux/rt_usb.c
+index d2d3a40..0474069 100644
+--- a/src/os/linux/rt_usb.c
++++ b/src/os/linux/rt_usb.c
+@@ -557,7 +557,7 @@ static void cmd_rsp_event_tasklet(unsigned long data)
+ 	unsigned int		IrqFlags;
+ 
+ 	pUrb = (purbb_t)data;
+-	pCmdRspEventContext	= (PRX_CONTEXT)RTMP_USB_URB_DATA_GET(pUrb);
++	pCmdRspEventContext	= (PCMD_RSP_CONTEXT)RTMP_USB_URB_DATA_GET(pUrb);
+ 	Status = RTMP_USB_URB_STATUS_GET(pUrb);
+ 	pAd = pCmdRspEventContext->pAd;
+ 
+diff --git a/src/sta/rtmp_data.c b/src/sta/rtmp_data.c
+index c60ba17..4705d62 100644
+--- a/src/sta/rtmp_data.c
++++ b/src/sta/rtmp_data.c
+@@ -737,7 +737,7 @@ if (0 /*!(pRxInfo->Mcast || pRxInfo->Bcast)*/){
+ 			    So, the EAP Request is dropped.
+ 			    The patch lookup pEntry from MacTable.
+ 			*/
+-			pEntry = MacTableLookup(pAd, &pHeader->Addr2);
++			pEntry = MacTableLookup(pAd, pHeader->Addr2);
+ 			if ( pEntry == NULL )
+ 			{
+ 				RELEASE_NDIS_PACKET(pAd, pRxPacket,
+diff --git a/src/sta/sta_cfg.c b/src/sta/sta_cfg.c
+index 4d7c51d..fab3f1f 100644
+--- a/src/sta/sta_cfg.c
++++ b/src/sta/sta_cfg.c
+@@ -482,6 +482,32 @@ static struct {
+ };
+ 
+ 
++#ifdef DOT11_N_SUPPORT
++#if defined(RT65xx) || defined(MT7601)
++#define MAX_AGG_CNT	32
++#elif defined(RT2883) || defined(RT3883)
++#define MAX_AGG_CNT	16
++#else
++#define MAX_AGG_CNT	8
++#endif
++/* DisplayTxAgg - display Aggregation statistics from MAC */
++static void DisplayTxAgg (RTMP_ADAPTER *pAd)
++{
++	ULONG totalCount;
++	ULONG aggCnt[MAX_AGG_CNT + 2];
++	int i;
++
++	AsicReadAggCnt(pAd, aggCnt, sizeof(aggCnt) / sizeof(ULONG));
++	totalCount = aggCnt[0] + aggCnt[1];
++	if (totalCount > 0)
++		for (i=0; i<MAX_AGG_CNT; i++) {
++			DBGPRINT(RT_DEBUG_OFF, ("\t%d MPDU=%ld (%ld%%)\n", i+1, aggCnt[i+2], aggCnt[i+2]*100/totalCount));
++		}
++	printk("====================\n");
++
++}
++#endif /* DOT11_N_SUPPORT */
++
+ INT RTMPSTAPrivIoctlSet(
+ 	IN RTMP_ADAPTER *pAd, 
+ 	IN PSTRING SetProcName,
+@@ -6709,7 +6735,7 @@ next:
+ 				sprintf(msg+strlen(msg), "%d %03d %02X\n", bank_Id, rfId, regRF);
+ 			}
+ 		}
+-		RtmpDrvAllRFPrint(NULL, msg, strlen(msg));
++		RtmpDrvAllRFPrint(NULL, (UINT32*)msg, strlen(msg));
+ 		/* Copy the information into the user buffer */
+ 
+ #ifdef LINUX
+@@ -7116,7 +7142,7 @@ VOID RTMPIoctlShow(
+             wrq->u.data.length = strlen(extra) + 1; /* 1: size of '\0' */
+             break;
+         case SHOW_DRVIER_VERION:
+-            snprintf(extra, size, "Driver version-%s, %s %s\n", STA_DRIVER_VERSION, __DATE__, __TIME__ );
++            snprintf(extra, size, "Driver version-%s\n", STA_DRIVER_VERSION);
+             wrq->u.data.length = strlen(extra) + 1; /* 1: size of '\0' */
+             break;
+ #ifdef DOT11_N_SUPPORT
+@@ -8941,7 +8967,7 @@ RtmpIoctl_rt_ioctl_siwgenie(
+ 				pAd->StaCfg.WpaAssocIeLen = length;
+ 				NdisMoveMemory(pAd->StaCfg.pWpaAssocIe, pData, pAd->StaCfg.WpaAssocIeLen);
+ 				pAd->StaCfg.bRSN_IE_FromWpaSupplicant = TRUE;
+-				eid_ptr = pAd->StaCfg.pWpaAssocIe;
++				eid_ptr = (PEID_STRUCT)pAd->StaCfg.pWpaAssocIe;
+ 				while (((UCHAR *)eid_ptr + eid_ptr->Len + 1) < ((UCHAR *)pAd->StaCfg.pWpaAssocIe + pAd->StaCfg.WpaAssocIeLen))
+ 				{
+ 					if ( eid_ptr->Eid == IE_WPA )
+diff --git a/src/sta/sync.c b/src/sta/sync.c
+index f859640..6270557 100644
+--- a/src/sta/sync.c
++++ b/src/sta/sync.c
+@@ -2341,7 +2341,7 @@ VOID PeerBeacon(
+ 											ie_list->HtCapabilityLen, 
+ 											&ie_list->AddHtInfo,
+ 											ie_list->AddHtInfoLen,
+-											ie_list,
++											(IE_LISTS*)ie_list,
+ 											ie_list->CapabilityInfo) == FALSE)
+ 					{
+ 						DBGPRINT(RT_DEBUG_TRACE, ("ADHOC - Add Entry failed.\n"));
