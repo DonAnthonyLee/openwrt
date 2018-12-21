@@ -31,8 +31,7 @@ PKG_DRIVERS = \
 	p54-common p54-pci p54-spi p54-usb \
 	rsi91x rsi91x-usb rsi91x-sdio\
 	wlcore wl12xx wl18xx \
-	zd1211rw \
-	rtl8188eu
+	zd1211rw
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_kmod-mac80211 \
@@ -385,17 +384,6 @@ define KernelPackage/zd1211rw
   AUTOLOAD:=$(call AutoProbe,zd1211rw)
 endef
 
-
-define KernelPackage/rtl8188eu
-  $(call KernelPackage/mac80211/Default)
-  TITLE:=RTL8188EU support
-  DEPENDS+= +kmod-mac80211 +kmod-lib80211 +kmod-usb-core +rtl8188eu-firmware
-  FILES:=$(PKG_BUILD_DIR)/drivers/staging/rtl8188eu/r8188eu.ko
-  AUTOLOAD:=$(call AutoProbe,r8188eu)
-endef
-
-
-
 ifdef CONFIG_PACKAGE_MAC80211_DEBUGFS
   config-y += \
 	CFG80211_DEBUGFS \
@@ -435,9 +423,6 @@ config-$(call config_package,zd1211rw) += ZD1211RW
 config-$(call config_package,rsi91x) += RSI_91X
 config-$(call config_package,rsi91x-usb) += RSI_USB
 config-$(call config_package,rsi91x-sdio) += RSI_SDIO
-
-config-$(call config_package,rtl8188eu) += R8188EU
-config-y += STAGING
 
 config-$(CONFIG_LEDS_TRIGGERS) += MAC80211_LEDS
 
