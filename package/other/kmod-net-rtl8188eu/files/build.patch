@@ -1,0 +1,20 @@
+diff -Nur a/Kconfig b/Kconfig
+--- a/Kconfig	2018-11-14 03:15:18.000000000 +0800
++++ b/Kconfig	2018-12-22 01:57:52.133254675 +0800
+@@ -1,6 +1,6 @@
+ config R8188EU
+ 	tristate "Realtek RTL8188EU Wireless LAN NIC driver"
+-	depends on WLAN && USB && CFG80211
++	depends on WLAN && USB
+ 	depends on m
+ 	select WIRELESS_EXT
+ 	select WEXT_PRIV
+diff -Nur a/Makefile b/Makefile
+--- a/Makefile	2018-12-22 02:32:45.397388741 +0800
++++ b/Makefile	2018-12-22 02:33:52.568726683 +0800
+@@ -54,4 +54,4 @@
+ 
+ obj-$(CONFIG_R8188EU)	:= r8188eu.o
+ 
+-ccflags-y += -I$(srctree)/$(src)/include
++ccflags-y += -I$(src)/include
