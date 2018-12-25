@@ -26,7 +26,7 @@ define KernelPackage/mt7601u_ap
   SUBMENU:=Wireless Drivers
   TITLE:=Driver for MT7601U wireless adapters in AP mode
   FILES:=$(PKG_BUILD_DIR)/src/os/linux/rtutil7601Uap.ko $(PKG_BUILD_DIR)/src/os/linux/mt7601Uap.ko $(PKG_BUILD_DIR)/src/os/linux/rtnet7601Uap.ko
-  DEPENDS:=+kmod-mac80211 +wireless-tools @USB_SUPPORT
+  DEPENDS:=@USB_SUPPORT
   AUTOLOAD:=$(call AutoProbe,\
 	rtutil7601Uap \
 	mt7601Uap \
@@ -54,7 +54,7 @@ endef
 
 define KernelPackage/mt7601u_ap/install
 	$(INSTALL_DIR) $(1)/etc/Wireless/RT2870AP
-	$(CP) $(PKG_BUILD_DIR)/etc/Wireless/RT2870AP/RT2870AP* $(1)/etc/Wireless/RT2870AP/
+	$(CP) $(PKG_BUILD_DIR)/etc/Wireless/RT2870AP/RT2870AP.dat $(1)/etc/Wireless/RT2870AP/
 endef
 
 $(eval $(call KernelPackage,mt7601u_ap))
