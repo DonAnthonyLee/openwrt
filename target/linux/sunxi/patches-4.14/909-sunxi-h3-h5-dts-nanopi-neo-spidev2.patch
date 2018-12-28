@@ -1,0 +1,140 @@
+diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi
+--- a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-12-29 02:44:50.792946240 +0800
++++ b/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-12-29 02:54:00.429178409 +0800
+@@ -57,9 +57,8 @@
+ 		i2c1 = &i2c1;
+ 		i2c2 = &i2c2;
+ 		spi0 = &spi0;
+-		spi1 = &spi1;
+-		spidev0 = &spidev0;
+ 		spidev1 = &spidev1;
++		spidev2 = &spidev2;
+ 		spiflash = &spiflash;
+ 		ethernet0 = &emac;
+ 		i2s0 = &i2s0;
+@@ -243,7 +242,7 @@
+ 	};
+ 
+ 	spi0_cs_pins: spi0_cs_pins {
+-		pins = "PC3", "PA6";
++		pins = "PC3", "PA6", "PG7";
+ 		function = "gpio_out";
+ 		bias-disable;
+ 	};
+@@ -296,19 +295,19 @@
+ 	pinctrl-names = "default", "lcd_st7735s";
+ 	pinctrl-0 = <&spi0_pins &spi0_cs_pins>;
+ 	pinctrl-1 = <&spi0_lcd_st7735s_pins &lcd_st7735s_dc_pin &spi0_cs_pins>;
+-	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>;
++	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>, <&pio 6 7 GPIO_ACTIVE_HIGH>;
+ 
+-	spidev0: spi@0 {
++	spidev1: spi@1 {
+ 		compatible = "nanopi,spidev";
+-		reg = <0>;
++		reg = <1>;
+ 		status = "disabled";
+ 
+ 		spi-max-frequency = <10000000>;
+ 	};
+ 
+-	spidev1: spi@1 {
++	spidev2: spi@2 {
+ 		compatible = "nanopi,spidev";
+-		reg = <1>;
++		reg = <2>;
+ 		status = "disabled";
+ 
+ 		spi-max-frequency = <10000000>;
+@@ -325,11 +324,6 @@
+ 	};
+ };
+ 
+-&spi1 {
+-	// against uart3_rts_cts_pins, so disable
+-	status = "disable";
+-};
+-
+ &i2c0 {
+ 	status = "okay";
+ 
+diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts
+--- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-12-29 02:44:59.232471673 +0800
++++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-12-29 02:48:37.513846025 +0800
+@@ -120,6 +120,11 @@
+     status = "okay";
+ };
+ 
++&spidev2 {
++    /* use PG7 as CS pin */
++    status = "okay";
++};
++
+ &spiflash {
+     compatible = "jedec,spi-nor";
+     spi-max-frequency = <24000000>;
+@@ -182,6 +187,10 @@
+ 	status = "disabled"; /* for I2S0 */
+ };
+ 
++&uart1 {
++	status = "disabled"; /* for spidev2 */
++};
++
+ &uart2 {
+ 	status = "disabled"; /* for OLED Hat Keys */
+ };
+diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-12-29 02:45:18.755396973 +0800
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-12-29 02:55:55.581026809 +0800
+@@ -58,6 +58,7 @@
+ 		i2c1 = &i2c1;
+ 		spi0 = &spi0;
+ 		spidev1 = &spidev1;
++		spidev2 = &spidev2;
+ 		spiflash = &spiflash;
+ 		ethernet0 = &emac;
+ 		i2s0 = &i2s0;
+@@ -318,7 +319,7 @@
+ &uart1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&uart1_pins>;
+-	status = "disabled";
++	status = "disabled"; /* for spidev2 */
+ };
+ 
+ &i2c1 {
+@@ -351,7 +352,7 @@
+ 	pinctrl-names = "default", "lcd_st7735s";
+ 	pinctrl-0 = <&spi0_pins &spi0_cs_pins>;
+ 	pinctrl-1 = <&spi0_lcd_st7735s_pins &lcd_st7735s_dc_pin &spi0_cs_pins>;
+-	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>;
++	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>, <&pio 6 7 GPIO_ACTIVE_HIGH>;
+ 
+ 	spidev1: spi@1 {
+ 		/* use PA6 as CS pin */
+@@ -362,6 +363,15 @@
+ 		spi-max-frequency = <10000000>;
+ 	};
+ 
++	spidev2: spi@2 {
++		/* use PG7 as CS pin */
++		compatible = "nanopi,spidev";
++		reg = <2>;
++		status = "okay";
++
++		spi-max-frequency = <10000000>;
++	};
++
+ 	lcd_st7735s: lcd_st7735s@1 {
+ 		compatible = "sitronix,st7735s";
+ 		reg = <1>;
+@@ -454,7 +464,7 @@
+ 	};
+ 
+ 	spi0_cs_pins: spi0_cs_pins {
+-		pins = "PC3", "PA6";
++		pins = "PC3", "PA6", "PG7";
+ 		function = "gpio_out";
+ 		bias-disable;
+ 	};
