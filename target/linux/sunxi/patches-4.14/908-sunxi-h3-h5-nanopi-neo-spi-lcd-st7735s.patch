@@ -1,0 +1,134 @@
+diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi b/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi
+--- a/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-12-28 17:25:32.104244011 +0800
++++ b/arch/arm/boot/dts/sun8i-h3-nanopi.dtsi	2018-12-28 17:08:34.772722550 +0800
+@@ -247,6 +247,16 @@
+ 		function = "gpio_out";
+ 		bias-disable;
+ 	};
++
++	spi0_lcd_st7735s_pins: spi0_lcd_st7735s_pins {
++		pins = "PC0", "PC2";
++		function = "spi0";
++	};
++
++	lcd_st7735s_dc_pin: lcd_st7735s_dc_pin {
++		pins = "PC1";
++		function = "gpio_out";
++	};
+ };
+ 
+ &r_pio {
+@@ -283,8 +293,9 @@
+ 	#size-cells = <0>;
+ 
+ 	status = "okay";
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "lcd_st7735s";
+ 	pinctrl-0 = <&spi0_pins &spi0_cs_pins>;
++	pinctrl-1 = <&spi0_lcd_st7735s_pins &lcd_st7735s_dc_pin &spi0_cs_pins>;
+ 	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>;
+ 
+ 	spidev0: spi@0 {
+diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts
+--- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-12-17 22:45:12.666533271 +0800
++++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-12-18 20:59:58.573380955 +0800
+@@ -58,6 +58,10 @@
+ 		oled_ssd1306_buffer: oled-ssd1306@3c {
+ 			reg = <0x4b1ffc00 0x400>;
+ 		};
++
++		lcd_st7735s_buffer: lcd_st7735s@1 {
++			reg = <0x4b1f7600 0x6400>;
++		};
+ 	};
+ 
+ 	/delete-node/ r_gpio_keys;
+@@ -193,3 +197,22 @@
+ 	/delete-node/ key_pins@0;
+ };
+ 
++&spi0 {
++	lcd_st7735s: lcd_st7735s@1 {
++		compatible = "sitronix,st7735s";
++		reg = <1>;
++		spi-max-frequency = <30000000>;
++		status = "disabled";
++		width = <80>;
++		height = <160>;
++		swap_xy = <1>;
++		offset_x = <26>;
++		offset_y = <1>;
++		rst_pin = "PA1";
++		blk_pin = "PL11";
++		dc_pin = "PC1";
++		backlight_active_high = <1>;
++		buffer = <&lcd_st7735s_buffer>;
++	};
++};
++
+diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-12-17 22:45:31.369871757 +0800
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-12-18 17:59:30.367008112 +0800
+@@ -75,6 +75,10 @@
+ 		oled_ssd1306_buffer: oled-ssd1306@3c {
+ 			reg = <0x4b1ffc00 0x400>;
+ 		};
++
++		lcd_st7735s_buffer: lcd_st7735s@1 {
++			reg = <0x4b1f7600 0x6400>;
++		};
+ 	};
+ 
+ 	oled_hat_keys@0 {
+@@ -344,8 +348,9 @@
+ 	#size-cells = <0>;
+ 
+ 	status = "okay";
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "lcd_st7735s";
+ 	pinctrl-0 = <&spi0_pins &spi0_cs_pins>;
++	pinctrl-1 = <&spi0_lcd_st7735s_pins &lcd_st7735s_dc_pin &spi0_cs_pins>;
+ 	cs-gpios = <&pio 2 3 GPIO_ACTIVE_HIGH>, <&pio 0 6 GPIO_ACTIVE_HIGH>;
+ 
+ 	spidev1: spi@1 {
+@@ -357,6 +362,23 @@
+ 		spi-max-frequency = <10000000>;
+ 	};
+ 
++	lcd_st7735s: lcd_st7735s@1 {
++		compatible = "sitronix,st7735s";
++		reg = <1>;
++		spi-max-frequency = <30000000>;
++		status = "disabled";
++		width = <80>;
++		height = <160>;
++		swap_xy = <1>;
++		offset_x = <26>;
++		offset_y = <1>;
++		rst_pin = "PA1";
++		blk_pin = "PL11";
++		dc_pin = "PC1";
++		backlight_active_high = <1>;
++		buffer = <&lcd_st7735s_buffer>;
++	};
++
+ 	spiflash: spiflash@0 {
+ 		#address-cells = <1>;
+ 		#size-cells = <1>;
+@@ -436,6 +458,16 @@
+ 		function = "gpio_out";
+ 		bias-disable;
+ 	};
++
++	spi0_lcd_st7735s_pins: spi0_lcd_st7735s_pins {
++		pins = "PC0", "PC2";
++		function = "spi0";
++	};
++
++	lcd_st7735s_dc_pin: lcd_st7735s_dc_pin {
++		pins = "PC1";
++		function = "gpio_out";
++	};
+ };
+ 
+ &r_pio {
