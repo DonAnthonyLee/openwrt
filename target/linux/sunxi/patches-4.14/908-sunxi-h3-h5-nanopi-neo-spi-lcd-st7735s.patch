@@ -34,11 +34,11 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
 +++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts	2018-12-18 20:59:58.573380955 +0800
 @@ -58,6 +58,10 @@
  		oled_ssd1306_buffer: oled-ssd1306@3c {
- 			reg = <0x4b1ffc00 0x400>;
+ 			reg = <0x0 0x0>;
  		};
 +
 +		lcd_st7735s_buffer: lcd_st7735s@1 {
-+			reg = <0x4b1f7600 0x6400>;
++			reg = <0x0 0x0>;
 +		};
  	};
  
@@ -71,11 +71,11 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-12-18 17:59:30.367008112 +0800
 @@ -75,6 +75,10 @@
  		oled_ssd1306_buffer: oled-ssd1306@3c {
- 			reg = <0x4b1ffc00 0x400>;
+ 			reg = <0x0 0x0>;
  		};
 +
 +		lcd_st7735s_buffer: lcd_st7735s@1 {
-+			reg = <0x4b1f7600 0x6400>;
++			reg = <0x0 0x0>;
 +		};
  	};
  

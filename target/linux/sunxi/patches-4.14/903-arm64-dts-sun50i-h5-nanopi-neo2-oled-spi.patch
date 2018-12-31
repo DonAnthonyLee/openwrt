@@ -134,11 +134,11 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
 +		ranges;
 +
 +		lbk_fonts: lbk_fonts@0 {
-+			reg = <0x4b060000 0x197200>;
++			reg = <0x4b060000 0x19fc00>;
 +		};
 +
 +		oled_ssd1306_buffer: oled-ssd1306@3c {
-+			reg = <0x4b1ffc00 0x400>;
++			reg = <0x0 0x0>;
 +		};
 +	};
 +
