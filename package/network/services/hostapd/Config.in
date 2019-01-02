@@ -85,6 +85,10 @@ config WPA_WOLFSSL
 	select WOLFSSL_HAS_SESSION_TICKET
 	select WOLFSSL_HAS_WPAS
 
+config DRIVER_RTL871X_SUPPORT
+	bool "Add RTL871X support"
+	default n
+
 config DRIVER_WEXT_SUPPORT
 	bool
 	default n
