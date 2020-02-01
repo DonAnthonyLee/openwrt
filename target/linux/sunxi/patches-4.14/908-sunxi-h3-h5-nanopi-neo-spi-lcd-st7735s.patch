@@ -43,7 +43,7 @@ diff -Nur a/arch/arm/boot/dts/sun8i-h3-nanopi-neo-oled-spi.dts b/arch/arm/boot/d
  	};
  
  	/delete-node/ r_gpio_keys;
-@@ -193,3 +197,22 @@
+@@ -195,3 +199,22 @@
  	/delete-node/ key_pins@0;
  };
  
@@ -115,7 +115,7 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
  	spiflash: spiflash@0 {
  		#address-cells = <1>;
  		#size-cells = <1>;
-@@ -436,6 +458,16 @@
+@@ -438,6 +460,16 @@
  		function = "gpio_out";
  		bias-disable;
  	};

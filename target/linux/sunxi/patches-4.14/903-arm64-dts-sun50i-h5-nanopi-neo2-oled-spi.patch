@@ -65,7 +65,7 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5.dtsi b/arch/arm64/boot/dts/a
 diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	1970-01-01 08:00:00.000000000 +0800
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts	2018-11-15 20:56:11.187764926 +0800
-@@ -0,0 +1,418 @@
+@@ -0,0 +1,420 @@
 +/*
 + * Copyright (C) 2017 Icenowy Zheng <icenowy@aosc.io>
 + *
@@ -415,22 +415,22 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
 +		};
 +
 +		partition@1 {
-+			reg = <0x0 0x90000>;
++			reg = <0x0 0x92000>;
 +			label = "uboot";
 +		};
 +
 +		partition@2 {
-+			reg = <0x90000 0x4000>;
++			reg = <0x92000 0x2000>;
 +			label = "uboot_env";
 +		};
 +
 +		partition@3 {
-+			reg = <0x94000 0x1000>;
++			reg = <0x94000 0xb00>;
 +			label = "openwrt_scr";
 +		};
 +
 +		partition@4 {
-+			reg = <0x95000 0x6000>;
++			reg = <0x94b00 0x6500>;
 +			label = "dtb";
 +		};
 +
@@ -458,6 +458,8 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
 +    oled-ssd1306@3c {
 +        compatible = "soloman,ssd1306-i2c";
 +        reg = <0x3c>;
++        width = <128>;
++        height = <64>;
 +        flip_vertical = <0>;
 +        buffer = <&oled_ssd1306_buffer>;
 +    };

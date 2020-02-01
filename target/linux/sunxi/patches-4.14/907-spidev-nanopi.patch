@@ -102,7 +102,7 @@ diff -Nur a/arch/arm64/boot/dts/allwinner/sun50i-h5-nanopi-neo2-oled-spi.dts b/a
  	spiflash: spiflash@0 {
  		#address-cells = <1>;
  		#size-cells = <1>;
-@@ -416,9 +426,15 @@
+@@ -418,9 +428,15 @@
  		function = "gpio_in";
  	};
  
