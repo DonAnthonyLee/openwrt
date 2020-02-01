@@ -65,7 +65,7 @@ platform_do_upgrade_combined() {
 	then
 		local rootfspart=$(platform_find_rootfspart "$partitions" "$kernelpart")
 		local append=""
-		[ -f "$CONF_TAR" -a "$SAVE_CONFIG" -eq 1 ] && append="-j $CONF_TAR"
+		[ -f "$UPGRADE_BACKUP" ] && append="-j $UPGRADE_BACKUP"
 
 		if [ "$PLATFORM_DO_UPGRADE_COMBINED_SEPARATE_MTD" -ne 1 ]; then
 		    ( dd if="$1" bs=$CI_BLKSZ skip=1 count=$kern_blocks 2>/dev/null; \
@@ -164,7 +164,7 @@ platform_do_upgrade_compex() {
 
 	if [ -n "$fw_mtd" ] &&  [ ${fw_blocks:-0} -gt 0 ]; then
 		local append=""
-		[ -f "$CONF_TAR" -a "$SAVE_CONFIG" -eq 1 ] && append="-j $CONF_TAR"
+		[ -f "$UPGRADE_BACKUP" ] && append="-j $UPGRADE_BACKUP"
 
 		sync
 		dd if="$fw_file" bs=64k skip=1 count=$fw_blocks 2>/dev/null | \
@@ -218,6 +218,7 @@ platform_check_image() {
 	archer-c7-v4|\
 	archer-c7-v5|\
 	bullet-m|\
+	bullet-m-xw|\
 	c-55|\
 	carambola2|\
 	cf-e316n-v2|\
@@ -393,7 +394,7 @@ platform_check_image() {
 		}
 
 		local md5_img=$(dd if="$1" bs=2 skip=9 count=16 2>/dev/null)
-		local md5_chk=$(dd if="$1" bs=$CI_BLKSZ skip=1 2>/dev/null | md5sum -); md5_chk="${md5_chk%% *}"
+		local md5_chk=$(fwtool -q -t -i /dev/null "$1"; dd if="$1" bs=$CI_BLKSZ skip=1 2>/dev/null | md5sum -); md5_chk="${md5_chk%% *}"
 
 		if [ -n "$md5_img" -a -n "$md5_chk" ] && [ "$md5_img" = "$md5_chk" ]; then
 			return 0
@@ -498,7 +499,7 @@ platform_check_image() {
 		local magic_ver="0100"
 
 		case "$board" in
-		tl-wdr6500-v2)
+		tl-wdr3320-v2|tl-wdr6500-v2)
 			magic_ver="0200"
 			;;
 		esac
@@ -557,6 +558,7 @@ platform_check_image() {
 	rb-912uag-2hpnd|\
 	rb-912uag-5hpnd|\
 	rb-921gs-5hpacd-r2|\
+	rb-922uags-5hpacd|\
 	rb-951g-2hnd|\
 	rb-951ui-2hnd|\
 	rb-2011l|\
@@ -566,6 +568,7 @@ platform_check_image() {
 	rb-2011uas-2hnd|\
 	rb-2011uias|\
 	rb-2011uias-2hnd|\
+	rb-2011uias-2hnd-r2|\
 	rb-sxt2n|\
 	rb-sxt5n)
 		nand_do_platform_check routerboard $1
@@ -583,29 +586,21 @@ platform_check_image() {
 		return $?
 		;;
 	cpe210|\
+	cpe510|\
 	eap120|\
 	wbs210|\
 	wbs510)
 		tplink_pharos_check_image "$1" "7f454c46" "$(tplink_pharos_get_model_string)" '' && return 0
 		return 1
 		;;
-	cpe210-v2)
+	cpe210-v2|\
+	cpe210-v3)
 		tplink_pharos_check_image "$1" "01000000" "$(tplink_pharos_v2_get_model_string)" '\0\xff\r' && return 0
 		return 1
 		;;
-	cpe510)
-		local modelstr="$(tplink_pharos_v2_get_model_string)"
-		tplink_pharos_board_detect $modelstr
-		case $AR71XX_MODEL in
-		'TP-Link CPE510 v2.0')
-			tplink_pharos_check_image "$1" "7f454c46" "$modelstr" '\0\xff\r' && return 0
-			return 1
-			;;
-		*)
-			tplink_pharos_check_image "$1" "7f454c46" "$(tplink_pharos_get_model_string)" '' && return 0
-			return 1
-			;;
-		esac
+	cpe510-v2)
+		tplink_pharos_check_image "$1" "7f454c46" "$(tplink_pharos_v2_get_model_string)" '\0\xff\r' && return 0
+		return 1
 		;;
 	a40|\
 	a60|\
@@ -730,6 +725,7 @@ platform_check_image() {
 	rb-lhg-5nd|\
 	rb-map-2nd|\
 	rb-mapl-2nd|\
+	rb-sxt-2nd-r3|\
 	rb-wap-2nd|\
 	rb-wapg-5hact2hnd|\
 	rb-wapr-2nd)
@@ -758,6 +754,7 @@ platform_pre_upgrade() {
 	rb-lhg-5nd|\
 	rb-map-2nd|\
 	rb-mapl-2nd|\
+	rb-sxt-2nd-r3|\
 	rb-wap-2nd|\
 	rb-wapg-5hact2hnd|\
 	rb-wapr-2nd)
@@ -804,7 +801,7 @@ platform_do_upgrade() {
 
 	case "$board" in
 	all0258n)
-		platform_do_upgrade_allnet "0x9f050000" "$ARGV"
+		platform_do_upgrade_allnet "0x9f050000" "$1"
 		;;
 	all0305|\
 	eap7660d|\
@@ -816,19 +813,19 @@ platform_do_upgrade() {
 	pb44|\
 	routerstation|\
 	routerstation-pro)
-		platform_do_upgrade_combined "$ARGV"
+		platform_do_upgrade_combined "$1"
 		;;
 	all0315n)
-		platform_do_upgrade_allnet "0x9f080000" "$ARGV"
+		platform_do_upgrade_allnet "0x9f080000" "$1"
 		;;
 	cap4200ag|\
 	eap300v2|\
 	ens202ext)
-		platform_do_upgrade_allnet "0xbf0a0000" "$ARGV"
+		platform_do_upgrade_allnet "0xbf0a0000" "$1"
 		;;
 	dir-825-b1|\
 	tew-673gru)
-		platform_do_upgrade_dir825b "$ARGV"
+		platform_do_upgrade_dir825b "$1"
 		;;
 	a40|\
 	a60|\
@@ -850,7 +847,7 @@ platform_do_upgrade() {
 	om5p-ac|\
 	om5p-acv2|\
 	om5p-an)
-		platform_do_upgrade_openmesh "$ARGV"
+		platform_do_upgrade_openmesh "$1"
 		;;
 	c-60|\
 	hiveap-121|\
@@ -876,6 +873,7 @@ platform_do_upgrade() {
 	rb-912uag-2hpnd|\
 	rb-912uag-5hpnd|\
 	rb-921gs-5hpacd-r2|\
+	rb-922uags-5hpacd|\
 	rb-951g-2hnd|\
 	rb-951ui-2hnd|\
 	rb-2011il|\
@@ -885,6 +883,7 @@ platform_do_upgrade() {
 	rb-2011uas-2hnd|\
 	rb-2011uias|\
 	rb-2011uias-2hnd|\
+	rb-2011uias-2hnd-r2|\
 	rb-sxt2n|\
 	rb-sxt5n|\
 	wi2a-ac200i|\
@@ -899,14 +898,14 @@ platform_do_upgrade() {
 	uap-pro|\
 	unifi-outdoor-plus)
 		MTD_CONFIG_ARGS="-s 0x180000"
-		default_do_upgrade "$ARGV"
+		default_do_upgrade "$1"
 		;;
 	wp543|\
 	wpe72)
-		platform_do_upgrade_compex "$ARGV"
+		platform_do_upgrade_compex "$1"
 		;;
 	*)
-		default_do_upgrade "$ARGV"
+		default_do_upgrade "$1"
 		;;
 	esac
 }

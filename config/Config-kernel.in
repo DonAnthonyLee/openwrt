@@ -6,6 +6,7 @@
 
 config KERNEL_BUILD_USER
 	string "Custom Kernel Build User Name"
+	default "builder" if BUILDBOT
 	default ""
 	help
 	  Sets the Kernel build user string, which for example will be returned
@@ -14,6 +15,7 @@ config KERNEL_BUILD_USER
 
 config KERNEL_BUILD_DOMAIN
 	string "Custom Kernel Build Domain Name"
+	default "buildhost" if BUILDBOT
 	default ""
 	help
 	  Sets the Kernel build domain string, which for example will be
@@ -189,6 +191,10 @@ config KERNEL_KPROBES
 	  If in doubt, say "N".
 
 config KERNEL_KPROBE_EVENT
+	bool
+	default y if KERNEL_KPROBES
+
+config KERNEL_KPROBE_EVENTS
 	bool
 	default y if KERNEL_KPROBES
 
@@ -519,6 +525,20 @@ if KERNEL_CGROUPS
 		  CONFIG_CFQ_GROUP_IOSCHED=y; for enabling throttling policy, set
 		  CONFIG_BLK_DEV_THROTTLING=y.
 
+	if KERNEL_BLK_CGROUP
+
+		config KERNEL_CFQ_GROUP_IOSCHED
+			bool "Proportional weight of disk bandwidth in CFQ"
+
+		config KERNEL_BLK_DEV_THROTTLING
+			bool "Enable throttling policy"
+			default y if TARGET_brcm2708
+
+		config KERNEL_BLK_DEV_THROTTLING_LOW
+			bool "Block throttling .low limit interface support (EXPERIMENTAL)"
+			depends on KERNEL_BLK_DEV_THROTTLING
+	endif
+
 	config KERNEL_DEBUG_BLK_CGROUP
 		bool "Enable Block IO controller debugging"
 		default n
@@ -755,7 +775,7 @@ menu "Filesystem ACL and attr support options"
 		select KERNEL_FS_POSIX_ACL
 		default y if USE_FS_ACL_ATTR
 
-	config KERNEL_HFSPLUG_FS_POSIX_ACL
+	config KERNEL_HFSPLUS_FS_POSIX_ACL
 		bool "Enable POSIX ACL for HFS+ Filesystems"
 		select KERNEL_FS_POSIX_ACL
 		default y if USE_FS_ACL_ATTR

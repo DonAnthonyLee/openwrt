@@ -12,9 +12,9 @@ PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL=$(PROJECT_GIT)/project/uhttpd.git
-PKG_SOURCE_DATE:=2018-08-23
-PKG_SOURCE_VERSION:=b741dec35698a80266fb8206970638e666774a33
-PKG_MIRROR_HASH:=2f7c88ba1b36dd6776a7d954b4c5e96aff288992acf19152a38641c665e261e4
+PKG_SOURCE_DATE:=2019-12-22
+PKG_SOURCE_VERSION:=5f9ae5738372aaa3a6be2f0a278933563d3f191a
+PKG_MIRROR_HASH:=16977c2d7e68f6db3241f874df625af9bd3bafa06fe4499ecb3561c825321e5d
 PKG_MAINTAINER:=Felix Fietkau <nbd@nbd.name>
 PKG_LICENSE:=ISC
 
@@ -34,7 +34,7 @@ endef
 
 define Package/uhttpd
   $(Package/uhttpd/default)
-  DEPENDS:=+libubox +libblobmsg-json +libjson-script
+  DEPENDS:=+libubox +libblobmsg-json +libjson-script +libjson-c
 endef
 
 define Package/uhttpd/description

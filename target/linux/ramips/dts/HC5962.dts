@@ -10,8 +10,8 @@
 	model = "HiWiFi HC5962";
 
 	aliases {
-		led-boot = &led_status;
-		led-failsafe = &led_status;
+		led-boot = &led_system;
+		led-failsafe = &led_system;
 		led-running = &led_status;
 		led-upgrade = &led_status;
 	};
@@ -25,7 +25,7 @@
 		bootargs = "console=ttyS0,115200";
 	};
 
-	gpio-leds {
+	leds {
 		compatible = "gpio-leds";
 
 		led_status: status {
@@ -33,13 +33,14 @@
 			gpios = <&gpio0 6 GPIO_ACTIVE_LOW>;
 		};
 
-		system {
+		led_system: system {
 			label = "hc5962:red:system";
 			gpios = <&gpio0 7 GPIO_ACTIVE_LOW>;
+			panic-indicator;
 		};
 	};
 
-	gpio-keys-polled {
+	keys {
 		compatible = "gpio-keys-polled";
 		poll-interval = <20>;
 

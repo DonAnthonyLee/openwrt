@@ -20,7 +20,7 @@
 		bootargs = "console=ttyS0,115200";
 	};
 
-	gpio-leds {
+	leds {
 		compatible = "gpio-leds";
 
 		lan {
@@ -54,11 +54,13 @@
 		wlan5g {
 			label = "c50:green:wlan5g";
 			gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "phy0tpt";
 		};
 
 		wlan2g {
 			label = "c50:green:wlan2g";
 			gpios = <&gpio3 0 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "phy1tpt";
 		};
 
 		wps {
@@ -67,7 +69,7 @@
 		};
 	};
 
-	gpio-keys-polled {
+	keys {
 		compatible = "gpio-keys-polled";
 		poll-interval = <20>;
 
@@ -116,6 +118,7 @@
 			};
 
 			partition@20000 {
+				compatible = "tplink,firmware";
 				label = "firmware";
 				reg = <0x20000 0x7a0000>;
 			};
