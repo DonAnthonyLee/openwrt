@@ -52,6 +52,10 @@ define Build/Compile
 	$(MAKE) $(MT7601U_MAKEOPTS)
 endef
 
+define KernelPackage/mt7601u_ap/conffiles
+/etc/Wireless/RT2870AP/RT2870AP.dat
+endef
+
 define KernelPackage/mt7601u_ap/install
 	$(INSTALL_DIR) $(1)/etc/Wireless/RT2870AP
 	$(CP) $(PKG_BUILD_DIR)/etc/Wireless/RT2870AP/RT2870AP.dat $(1)/etc/Wireless/RT2870AP/
