@@ -4,27 +4,9 @@
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 
-define KernelPackage/rtc-sun6i
-    SUBMENU:=$(OTHER_MENU)
-    TITLE:=Sunxi SoC A31 RTC support
-    DEPENDS:=@TARGET_sunxi
-    $(call AddDepends/rtc)
-    KCONFIG:= \
-        CONFIG_RTC_DRV_SUN6I \
-        CONFIG_RTC_CLASS=y
-    FILES:=$(LINUX_DIR)/drivers/rtc/rtc-sun6i.ko
-    AUTOLOAD:=$(call AutoLoad,50,rtc-sun6i)
-endef
-
-define KernelPackage/rtc-sun6i/description
- Support for the AllWinner A31 RTC
-endef
-
-$(eval $(call KernelPackage,rtc-sun6i))
-
 define KernelPackage/rtc-sunxi
     SUBMENU:=$(OTHER_MENU)
-    TITLE:=Sunxi SoC sun4i/sun7i RTC support
+    TITLE:=Sunxi SoC built-in RTC support
     DEPENDS:=@TARGET_sunxi
     $(call AddDepends/rtc)
     KCONFIG:= \
@@ -35,7 +17,7 @@ define KernelPackage/rtc-sunxi
 endef
 
 define KernelPackage/rtc-sunxi/description
- Support for the AllWinner sun4i/sun7i RTC
+ Support for the AllWinner sunXi SoC's onboard RTC
 endef
 
 $(eval $(call KernelPackage,rtc-sunxi))
